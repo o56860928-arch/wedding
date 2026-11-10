@@ -41,23 +41,66 @@ label.f{display:block;margin:10px 0 3px;font-size:13px;color:var(--mute)}
 .q b{font-variant-numeric:tabular-nums}.empty{text-align:center;color:var(--mute);padding:28px 10px}
 #toast{position:fixed;left:50%;transform:translateX(-50%);bottom:84px;background:#222;color:#fff;padding:9px 16px;border-radius:20px;font-size:14px;display:none;z-index:9}
 :focus-visible{outline:2px solid var(--g);outline-offset:2px}
+
+.rk{display:flex;align-items:center;gap:10px}.rk .n{font-size:26px;font-weight:700;color:var(--g);min-width:30px}.rk .sc{margin-left:auto;text-align:right;font-size:30px;font-weight:700;line-height:1}.rk .sc small{display:block;font-size:12px;font-weight:400;color:var(--mute)}
+.crit{display:flex;align-items:center;gap:8px;margin-top:6px;font-size:14px}.crit .l{width:76px;color:var(--mute);flex:none}.dots{display:flex;gap:4px}.dots button{width:36px;height:36px;border-radius:8px;border:1px solid var(--line);background:var(--card);font-weight:600;cursor:pointer}.dots button.on{background:var(--g);color:#fff;border-color:var(--g)}
+.bar{height:6px;background:var(--g2);border-radius:3px;margin:8px 0 4px;overflow:hidden}.bar b{display:block;height:100%;background:var(--g)}
+.note{font-size:13px;color:var(--mute);margin:0 2px 12px}.wset{display:grid;grid-template-columns:1fr 90px;gap:8px 10px;padding:4px 14px 14px;align-items:center}.wset select,.wset input{padding:8px;border:1px solid var(--line);border-radius:8px;background:var(--bg)}
 </style></head><body>
 <header><div class="top"><div><div class="sub" id="dd">결혼 준비 진행률</div><div class="pct" id="pct">0<small>%</small></div></div></div>
 <div class="seg" id="seg"></div><div class="sub" id="cnt"></div></header>
 <main id="main"></main>
-<nav><button data-t="ck" class="on">체크리스트</button><button data-t="h">웨딩홀</button><button data-t="q">견적</button></nav>
+<nav><button data-t="ck" class="on">체크리스트</button><button data-t="h">웨딩홀</button><button data-t="q">견적</button><button data-t="r">순위</button></nav>
 <dialog id="dlg"></dialog><div id="toast"></div>
 <script>
 const $=s=>document.querySelector(s),E=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const API='https://script.google.com/macros/s/AKfycbzdTjA5x59IaTSJwSMDW5Yv2RUt6LaYwM-SMuoaFA9mNoWgsl6C-FBs3yK3xCn2-6C8/exec';
-let cfg=JSON.parse(localStorage.cfg||'{}'),S=JSON.parse(localStorage.cache||'{"Halls":[],"Quotes":[],"Checklist":[]}'),tab='ck';
+let cfg=JSON.parse(localStorage.cfg||'{}'),S=JSON.parse(localStorage.cache||'{"Halls":[],"Quotes":[],"Checklist":[],"Scores":[]}'),tab='ck';
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,5);
 const won=n=>Math.round(n/1e4).toLocaleString('ko-KR')+'만원';
-const tot=q=>(+q.hall_fee||0)+(+q.flower||0)+(+q.meal||0)*(+q.guests||0)+(+q.extra||0)-(+q.discount||0);
+const CRIT=[['meal','식사'],['vibe','홀 분위기'],['access','교통·주차'],['flow','동선·편의'],['gap','예식 여유']];
+const getW=()=>{const r=(S.Scores||[]).find(x=>x.id=='_w')||{};return{c1:+r.c1||3,c2:+r.c2||3,c3:+r.c3||3,c4:+r.c4||3,c5:+r.c5||3,c6:+r.c6||4,c7:+r.c7||150}};
+const base=()=>getW().c7;
+const fees=q=>(+q.hall_fee||0)+(+q.flower||0)+(+q.extra||0)-(+q.discount||0);
+const complete=q=>+q.hall_fee>0&&+q.meal>0;
+const tot=q=>fees(q)+(+q.meal||0)*(+q.guests||base());
+const costAt=q=>fees(q)+(+q.meal||0)*Math.max(base(),+q.guests||0);
+const hallCost=h=>{const c=S.Quotes.filter(q=>q.hall==h.id&&complete(q)).map(costAt);return c.length?Math.min(...c):null};
+function priceScores(){const c=S.Halls.map(h=>[h.id,hallCost(h)]).filter(x=>x[1]!=null),o={};if(!c.length)return o;const lo=Math.min(...c.map(x=>x[1])),hi=Math.max(...c.map(x=>x[1]));c.forEach(([id,v])=>o[id]=hi==lo?5:Math.round((5-4*(v-lo)/(hi-lo))*10)/10);return o}
+function ranking(){const W=getW(),ps=priceScores();return S.Halls.map(h=>{const sr=(S.Scores||[]).find(x=>x.id==h.id)||{};let num=0,den=0,n=0;CRIT.forEach((c,i)=>{const v=+sr['c'+(i+1)]||0,w=W['c'+(i+1)];if(v){num+=v*w;den+=5*w;n++}});const p=ps[h.id];if(p!=null){num+=p*W.c6;den+=5*W.c6;n++}return{h,sr,p,n,cost:hallCost(h),total:den&&n>=3?Math.round(num/den*100):null}}).sort((a,b)=>(b.total??-1)-(a.total??-1))}
+let wOpen=false;
 function toast(m){const t=$('#toast');t.textContent=m;t.style.display='block';clearTimeout(t._);t._=setTimeout(()=>t.style.display='none',2800)}
+const SEED_H=[{id:'h4',name:'더뷔포레',region:''},{id:'h5',name:'양재 엘블레스',region:'서울 양재',memo:'블로그 #5: aT포레보다 화려하고 층고는 더 낮다는 비교'}];
+const SEED_Q=[
+{id:'qs1',hall:'h4',time:'일요일 15시',hall_fee:6400000,meal:81000,discount:500000,memo:'당일계약 시 -50만원. 보증인원·예식 날짜는 기재 없음(비교는 기준 인원으로 계산)'},
+{id:'qs2',hall:'h0',meal:80000,memo:'하반기 상담 기준. 식대 정가 93,000원 → 80,000원으로 안내받음. 대관료도 할인받았으나 금액은 기재 없음(대관료 입력 필요). 날짜별 견적 차이가 크고 잔여타임은 할인 폭이 큼 → 내 일정을 넣어 확인 권장'},
+{id:'qs3',hall:'h3',wdate:'2028-01-22',time:'토 15시',guests:150,hall_fee:6400000,meal:79000,memo:'28년 상반기. 합계 1,825만원. 계약금 50만원(취소 시 환불 불가). 2월로 변경해도 동일 시간대면 같은 견적'},
+{id:'qs4',hall:'h3',wdate:'2028-01-08',time:'토 16시',guests:150,hall_fee:6100000,meal:76000,memo:'28년 상반기. 합계 1,750만원. 계약금 50만원(취소 시 환불 불가). 2월로 변경해도 동일 시간대면 같은 견적'},
+{id:'qs5',hall:'h1',wdate:'2026-12-12',time:'토 15:30',guests:250,hall_fee:5500000,meal:66000,memo:'할인가 기준(정가: 대인 90,000원·대관료 900만원·총 3,150만원). 소인(5~7세) 33,000원, 음주류 무료(정가 7,700원). 예식 90분. 합계 2,200만원. 부대비용 항목: 대관료·혼구용품·플라워·컨시어지·포토테이블·플라워샤워(수동·고깔 4EA). 시식 최대 6인. 당일계약 시 전문사회자, 방문후기 이벤트(혼성4중창)'},
+{id:'qs6',hall:'h1',wdate:'2027-03-13',time:'토 14시',guests:300,hall_fee:7500000,meal:75000,memo:'할인가 기준. 합계 3,000만원. 소인 45,000원(할인 없음), 음주류 무료. 예식 90분. 표의 정가 총 견적 3,150만원은 계산값(3,600만원)과 달라 오기로 보임. 토 12:30·14:00 시간대는 비수기 제외 시 최소보증 300명'},
+{id:'qs7',hall:'h5',time:'9/4 토 11시',guests:250,hall_fee:7800000,meal:84000,memo:'식대 총 2,100만원 ÷ 250명 = 1인 84,000원으로 환산해 입력. 합계 2,880만원'},
+{id:'qs8',hall:'h5',time:'9/11 토 17시',guests:200,hall_fee:4600000,meal:75000,memo:'식대 총 1,500만원 ÷ 200명 = 1인 75,000원으로 환산해 입력. 합계 1,960만원'},
+{id:'qs9',hall:'h2',wdate:'2027-10-09',time:'토 11시',guests:150,hall_fee:3200000,meal:61000,memo:'식대 총액 9,150,000원(150명 기준), 합계 12,350,000원. 대관료란에 할인 적용 표기가 있는 것으로 보임(캡처가 작아 확실하지 않음)'}];
+const SEED_S=[{id:'h0',c1:4,c2:5,c3:4,c4:3,c5:5},{id:'h1',c1:3,c2:3,c3:5,c4:3,c5:4},{id:'h2',c1:2,c2:3,c3:5,c4:4},{id:'h3',c1:5,c2:5,c4:4}];
+const post=(tab,op,row)=>fetch(API,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({tab,op,row})}).then(r=>r.json()).then(d=>{if(d.error)throw d.error});
+async function seedOnce(d){
+ try{
+  if(!localStorage.seedQ2){
+   for(const h of SEED_H)if(!S.Halls.some(x=>x.id==h.id)){S.Halls.push(h);await post('Halls','save',h)}
+   for(const q of SEED_Q)if(!S.Quotes.some(x=>x.id==q.id)){S.Quotes.push(q);await post('Quotes','save',q)}
+   localStorage.seedQ2='1';localStorage.cache=JSON.stringify(S);toast('견적 9건을 시트에 추가했어요')}
+ }catch(e){toast('견적 추가 실패: '+e)}
+ try{
+  if(d.Scores&&!localStorage.seedS1){
+   if(!S.Scores.length)for(const r of SEED_S){S.Scores.push(r);await post('Scores','save',r)}
+   localStorage.seedS1='1'}
+ }catch(e){toast('점수 저장 실패: '+e)}
+ render()}
 async function load(){
- try{const d=await(await fetch(API)).json();if(d.error)throw d.error;S=d;localStorage.cache=JSON.stringify(d)}catch(e){toast('불러오기 실패: '+e)}render()}
-function send(tab,op,row){fetch(API,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({tab,op,row})}).then(r=>r.json()).then(d=>{if(d.error)throw d.error}).catch(e=>toast('저장 실패: '+e))}
+ let d={};
+ try{d=await(await fetch(API)).json();if(d.error)throw d.error;S={Halls:d.Halls||[],Quotes:d.Quotes||[],Checklist:d.Checklist||[],Scores:d.Scores||[]};localStorage.cache=JSON.stringify(S)}catch(e){toast('불러오기 실패: '+e);render();return}
+ render();seedOnce(d)}
+function send(tab,op,row){post(tab,op,row).catch(e=>toast('저장 실패: '+e))}
 function save(tb,row){const L=S[tb],i=L.findIndex(x=>x.id==row.id);i<0?L.push(row):L[i]=row;localStorage.cache=JSON.stringify(S);render();send(tb,'save',row)}
 function del(tb,id){if(!confirm('삭제할까요?'))return;S[tb]=S[tb].filter(x=>x.id!=id);localStorage.cache=JSON.stringify(S);render();send(tb,'del',{id})}
 const HF=[['name','웨딩홀 이름'],['region','지역'],['location','위치·교통','t'],['parking','주차','t'],['vibe','홀 분위기','t'],['capacity','규모(좌석·버진로드·층고)','t'],['interval','예식 간격','t'],['bride','신부대기실','t'],['family','혼주·가족 공간','t'],['food','연회장·식사','t'],['pros','장점','t'],['cons','아쉬운 점','t'],['price','가격 메모','t'],['tips','예약·계약 팁','t'],['src','출처'],['memo','내 메모','t']];
@@ -74,10 +117,19 @@ function head(){const L=S.Checklist,ph=[...new Set(L.map(x=>x.phase))],dn=L.filt
 function viewCk(){const L=S.Checklist,ph=[...new Set(L.map(x=>x.phase))];if(!ph.length)return'<div class="empty">불러오는 중이거나 아직 항목이 없어요.<br>잠시 후 새로고침해 보세요.</div>';
  return ph.map((n,i)=>{const a=L.filter(x=>x.phase==n),c=a.filter(x=>x.done=='Y').length;
  return`<details ${c<a.length&&!document.querySelector('details[open]')&&i==ph.findIndex(p=>L.some(x=>x.phase==p&&x.done!='Y'))?'open':''} data-p="${E(n)}"><summary>${E(n)}<span>${c}/${a.length}</span></summary><div class="mini"><b style="width:${c/a.length*100}%"></b></div>`+a.map(x=>`<div class="it ${x.done=='Y'?'d':''}"><input type="checkbox" id="k${x.id}" ${x.done=='Y'?'checked':''} data-id="${x.id}"><label for="k${x.id}">${E(x.text)}</label><button class="x" data-del="${x.id}" aria-label="삭제">×</button></div>`).join('')+`<button class="add" data-add="${E(n)}">+ 항목 추가</button></details>`}).join('')+'<button class="btn fab" data-addp>+ 새 단계 만들기</button>'}
-function viewH(){const H=S.Halls;return'<button class="btn p fab" data-newh>+ 웨딩홀 추가</button>'+(H.length?H.map(h=>{const qs=S.Quotes.filter(q=>q.hall==h.id).map(tot).filter(x=>x>0),m=qs.length?Math.min(...qs):0;
+function viewH(){const H=S.Halls;return'<button class="btn p fab" data-newh>+ 웨딩홀 추가</button>'+(H.length?H.map(h=>{const qs=S.Quotes.filter(q=>q.hall==h.id).filter(complete).map(tot),m=qs.length?Math.min(...qs):0;
  return`<div class="card"><h3>${E(h.name)}</h3><div class="tag">${E(h.region)}</div>${m?`<div class="best">최저 견적 ${won(m)} (${qs.length}건)</div>`:''}<dl>${HF.slice(2).filter(f=>h[f[0]]).map(f=>`<dt>${f[1].replace(/\(.*\)/,'')}</dt><dd>${E(h[f[0]])}</dd>`).join('')}</dl><div class="row"><button class="btn" data-eh="${h.id}">수정</button><button class="btn" data-nq="${h.id}">견적 추가</button><button class="btn w" data-dh="${h.id}">삭제</button></div></div>`}).join(''):'<div class="empty">웨딩홀을 추가해 보세요.</div>')}
-function viewQ(){const Q=[...S.Quotes].sort((a,b)=>tot(a)-tot(b));return'<button class="btn p fab" data-nq="">+ 견적 추가</button>'+(Q.length?`<div class="card">`+Q.map(q=>{const h=S.Halls.find(x=>x.id==q.hall),t=tot(q);return`<div class="q"><div><b>${E(h?h.name:'(삭제된 웨딩홀)')}</b><div class="tag">${E([q.wdate,q.time,q.guests&&q.guests+'명',q.source].filter(Boolean).join(' · '))}</div><div class="tag">${E(q.memo)}</div><div class="row" style="margin-top:4px"><button class="btn" data-eq="${q.id}">수정</button><button class="btn w" data-dq="${q.id}">삭제</button></div></div><div style="text-align:right"><b>${won(t)}</b><div class="tag">${+q.guests?'1인 '+won(t/q.guests):''}</div></div></div>`}).join('')+'</div>':'<div class="empty">받은 견적을 입력하면 총액 순으로 비교돼요.<br>총액 = 대관료 + 생화 + 식대×인원 + 기타 − 할인</div>')}
-function render(){head();$('#main').innerHTML={ck:viewCk,h:viewH,q:viewQ}[tab]();document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.t==tab))}
+function viewQ(){const Q=[...S.Quotes].sort((a,b)=>(complete(b)-complete(a))||tot(a)-tot(b));return'<button class="btn p fab" data-nq="">+ 견적 추가</button>'+(Q.length?`<div class="card">`+Q.map(q=>{const h=S.Halls.find(x=>x.id==q.hall),ok=complete(q),t=tot(q);return`<div class="q"><div><b>${E(h?h.name:'(삭제된 웨딩홀)')}</b><div class="tag">${E([q.wdate,q.time,q.guests&&q.guests+'명',q.source].filter(Boolean).join(' · '))}</div>${ok?'':'<div class="tag" style="color:var(--warn)">대관료·식대가 비어 있어요. 수정에서 입력하세요</div>'}<div class="tag">${E(q.memo)}</div><div class="row" style="margin-top:4px"><button class="btn" data-eq="${q.id}">수정</button><button class="btn w" data-dq="${q.id}">삭제</button></div></div><div style="text-align:right"><b>${ok?won(t):'정보 부족'}</b>${ok?`<div class="tag">${+q.guests?'1인 '+won(t/q.guests):'기준 '+base()+'명 적용'}</div>`:''}</div></div>`}).join('')+'</div>':'<div class="empty">받은 견적을 입력하면 총액 순으로 비교돼요.<br>총액 = 대관료 + 생화 + 기타 − 할인 + 식대×인원</div>')}
+function viewR(){
+ if(!S.Halls.length)return'<div class="empty">웨딩홀을 먼저 추가하세요.</div>';
+ const W=getW(),R=ranking(),sel=v=>[1,2,3,4,5].map(n=>`<option ${n==v?'selected':''}>${n}</option>`).join('');
+ return`<p class="note">항목별 점수(1~5)를 누르면 저장돼요. 점수 × 중요도로 100점 만점 순위를 계산하고, 견적 점수는 아래 기준 인원 가격으로 자동 계산돼요. 식사·분위기 등 기본 점수는 블로그 후기를 보고 제가 넣은 초안이니 직접 고치세요.</p>
+ <details ${wOpen?'open':''} id="wd"><summary>중요도·기준 인원<span>설정</span></summary><div class="wset">${CRIT.map((c,i)=>`<label>${c[1]} 중요도</label><select data-w="c${i+1}">${sel(W['c'+(i+1)])}</select>`).join('')}<label>견적(가격) 중요도</label><select data-w="c6">${sel(W.c6)}</select><label>예상 하객 수(명)<br><span class="tag">보증인원이 더 많으면 보증인원 기준</span></label><input type="number" inputmode="numeric" data-w="c7" value="${W.c7}"></div></details>`+
+ R.map((r,i)=>`<div class="card"><div class="rk"><span class="n">${r.total==null?'-':i+1}</span><div><h3>${E(r.h.name)}</h3><div class="tag">${r.total==null?(r.n+'/6개 평가 · 3개 이상 평가하면 순위에 들어가요'):r.n+'/6개 항목 평가'}</div></div><div class="sc">${r.total==null?'-':r.total}<small>/ 100점</small></div></div><div class="bar"><b style="width:${r.total||0}%"></b></div>`+
+ CRIT.map((c,k)=>{const v=+r.sr['c'+(k+1)]||0;return`<div class="crit"><span class="l">${c[1]}</span><div class="dots">${[1,2,3,4,5].map(n=>`<button class="${n==v?'on':''}" data-sc="${r.h.id}|c${k+1}|${n}" aria-label="${c[1]} ${n}점">${n}</button>`).join('')}</div></div>`}).join('')+
+ `<div class="crit"><span class="l">견적</span><span>${r.p!=null?`<b>${r.p}점</b> · 기준 ${W.c7}명 최저 약 ${won(r.cost)}`:'<span class="tag">완성된 견적이 없어요 (대관료·식대 입력)</span>'}</span></div></div>`).join('')+
+ '<p class="note">견적 점수는 등록된 웨딩홀 중 가장 싼 곳이 5점, 가장 비싼 곳이 1점인 상대 점수예요. 날짜·시간대에 따라 견적이 크게 달라서 웨딩홀마다 최저 견적을 비교해요.</p>'}
+function render(){head();$('#main').innerHTML={ck:viewCk,h:viewH,q:viewQ,r:viewR}[tab]();document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.t==tab))}
 document.addEventListener('click',e=>{const t=e.target,g=a=>t.dataset[a];
  if(t.dataset.t){tab=g('t');render();scrollTo(0,0)}
  else if(t.id=='cfgb')openCfg();
@@ -89,8 +141,9 @@ document.addEventListener('click',e=>{const t=e.target,g=a=>t.dataset[a];
  else if(g('dh'))del('Halls',g('dh'));
  else if(g('nq')!=null){if(!S.Halls.length)return toast('웨딩홀을 먼저 추가하세요');form('Quotes',QF,{hall:g('nq')||S.Halls[0].id},'견적 추가')}
  else if(g('eq'))form('Quotes',QF,S.Quotes.find(x=>x.id==g('eq')),'견적 수정');
- else if(g('dq'))del('Quotes',g('dq'))});
-document.addEventListener('change',e=>{const id=e.target.dataset.id;if(!id)return;const x=S.Checklist.find(i=>i.id==id);const o=document.querySelector(`details[data-p="${CSS.escape(x.phase)}"]`).open;save('Checklist',{...x,done:e.target.checked?'Y':''});const d=document.querySelector(`details[data-p="${CSS.escape(x.phase)}"]`);if(d)d.open=true});
+ else if(g('dq'))del('Quotes',g('dq'))
+ else if(g('sc')){const[hid,c,v]=g('sc').split('|');const cur=(S.Scores||[]).find(x=>x.id==hid)||{};const row={id:hid,c1:'',c2:'',c3:'',c4:'',c5:'',c6:'',c7:'',...cur};row[c]=String(row[c])==v?'':v;save('Scores',row)}});
+document.addEventListener('change',e=>{const w=e.target.dataset.w;if(w){const W=getW();W[w]=Math.max(1,+e.target.value||(w=='c7'?150:3));wOpen=true;save('Scores',{id:'_w',...W});return}const id=e.target.dataset.id;if(!id)return;const x=S.Checklist.find(i=>i.id==id);const o=document.querySelector(`details[data-p="${CSS.escape(x.phase)}"]`).open;save('Checklist',{...x,done:e.target.checked?'Y':''});const d=document.querySelector(`details[data-p="${CSS.escape(x.phase)}"]`);if(d)d.open=true});
 if('serviceWorker'in navigator)navigator.serviceWorker.register('sw.js');
 render();load();
 </script></body></html>
