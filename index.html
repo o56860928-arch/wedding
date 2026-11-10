@@ -161,7 +161,7 @@ input[type=range].sl{-webkit-appearance:none;appearance:none;width:100%;height:3
 <dialog id="dlg"></dialog><div id="toast"></div>
 <script>
 const $=s=>document.querySelector(s),E=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const API='https://script.google.com/macros/s/AKfycbzdTjA5x59IaTSJwSMDW5Yv2RUt6LaYwM-SMuoaFA9mNoWgsl6C-FBs3yK3xCn2-6C8/exec';
+const API='https://script.google.com/macros/s/AKfycbzMEvJsKMB6WCRmIxp2MMEtEZHmpP0KJVYV56iS6uCESfhtjLgVhlTGO7S3yxZHSPXo/exec';
 let cfg=JSON.parse(localStorage.cfg||'{}'),S=JSON.parse(localStorage.cache||'{"Halls":[],"Quotes":[],"Checklist":[],"Scores":[],"Budget":[]}'),tab='ck';
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,5);
 const won=n=>Math.round(n/1e4).toLocaleString('ko-KR')+'만원';
@@ -228,18 +228,18 @@ function viewH(){const H=S.Halls;return'<button class="btn p fab" data-newh>+ �
  return`<div class="card"><h3>${E(h.name)}</h3><div class="tag">${E(h.region)}</div>${m?`<div class="best">식대 포함 최저 ${won(m)}<div class="tag" style="font-weight:400">하객 ${base()}명 기준(보증인원이 더 많으면 보증인원 기준) · 견적 ${qs.length}건</div></div>`:''}<dl>${HF.slice(2).filter(f=>h[f[0]]).map(f=>`<dt>${f[1].replace(/\(.*\)/,'')}</dt><dd>${E(h[f[0]])}</dd>`).join('')}</dl><div class="row"><button class="btn" data-eh="${h.id}">수정</button><button class="btn" data-nq="${h.id}">견적 추가</button><button class="btn w" data-dh="${h.id}">삭제</button></div></div>`}).join(''):'<div class="empty">웨딩홀을 추가해 보세요.</div>')}
 function quoteCard(q){const ok=complete(q),g=+q.guests||0,t=tot(q),m=+q.meal||0;
  const mealSum=!m?vv(''):g?fw(m*g)+' ('+g+'명)':fw(m*base())+' (보증인원이 비어있어 하객 '+base()+'명 기준)';
- const R=(l,v)=>`<dt>${l}</dt><dd>${v}</dd>`,mon=v=>vv(v,x=>fw(+x)),dd=[R('예식일',vv(q.wdate)),R('요일·시간대',vv(q.time)),R('보증인원',vv(q.guests,x=>x+'명'))];
- if(q.qdate)dd.push(R('견적 받은 날',E(q.qdate)));if(q.source)dd.push(R('출처',E(q.source)));
+ const R=(l,v)=>`<dt>${l}</dt><dd>${v}</dd>`,mon=v=>vv(v,x=>fw(+x)),dd=[R('예식일',vv(q.wdate,ds)),R('요일·시간대',vv(q.time)),R('보증인원',vv(q.guests,x=>x+'명'))];
+ if(q.qdate)dd.push(R('견적 받은 날',E(ds(q.qdate))));if(q.source)dd.push(R('출처',E(q.source)));
  const cost=[R('대관료',mon(q.hall_fee)),R('생화장식',mon(q.flower)),R('식대 1인(대인)',mon(q.meal)),R('식대 합계',mealSum),R('소인(5~7세) 식대',mon(q.child)),R('주류 식대',vv(q.drink,x=>+x===0?'무료':fw(+x))),R('기타 추가금',mon(q.extra)),R('할인·혜택',vv(q.discount,x=>'−'+fw(+x)))];
  const cond=[R('계약금',mon(q.deposit)),R('부대비용·포함 항목',vv(q.incl)),R('혜택·특이사항',vv(q.perk)),R('메모',vv(q.memo))];
- return`<div class="card"><div class="qh"><h3>견적 ${qNo(q)}</h3><span class="tag">${E([q.wdate,q.time].filter(Boolean).join(' · ')||'날짜·시간 비어있음')}</span></div>
+ return`<div class="card"><div class="qh"><h3>견적 ${qNo(q)}</h3><span class="tag">${E([ds(q.wdate),q.time].filter(Boolean).join(' · ')||'날짜·시간 비어있음')}</span></div>
  <div class="gh">기본 정보</div><dl class="qd">${dd.join('')}</dl><div class="gh">비용</div><dl class="qd">${cost.join('')}</dl>
  <div class="best">총 견적 (식대 포함) ${ok?`<b>${fw(t)}</b>${g&&g<base()?`<div class="tag" style="font-weight:400">하객 ${base()}명이면 ${fw(costAt(q))}</div>`:''}`:'<span class="ev">계산 불가 · 대관료·식대가 비어있어요</span>'}<div class="tag" style="font-weight:400">대관료 + 생화 + 기타 − 할인 + 식대×인원 (소인·주류 제외)</div></div>
  <div class="gh">조건</div><dl class="qd">${cond.join('')}</dl><div class="row"><button class="btn" data-eq="${q.id}">수정</button><button class="btn w" data-dq="${q.id}">삭제</button></div></div>`}
 function viewQCards(){const known=new Set(S.Halls.map(h=>h.id)),orph=S.Quotes.filter(q=>!known.has(q.hall));
  return S.Halls.map(h=>{const L=S.Quotes.filter(q=>q.hall==h.id);return`<div class="hh"><h3>${E(h.name)}</h3><span class="tag">${L.length?'견적 '+L.length+'건':'견적 없음'}</span><button class="btn" data-nq="${h.id}">+ 견적 추가</button></div>`+L.map(quoteCard).join('')}).join('')+(orph.length?'<div class="hh"><h3>삭제된 웨딩홀</h3></div>'+orph.map(quoteCard).join(''):'')+(S.Halls.length?'':'<div class="empty">웨딩홀을 먼저 추가하세요.</div>')}
 let qmode='table';
-const ds=d=>{const m=String(d||'').match(/^(\d{4})-(\d\d)-(\d\d)/);return m?m[1].slice(2)+'.'+(+m[2])+'.'+(+m[3]):d};
+const ds=d=>{d=String(d||'');if(/T.*Z$/.test(d)){const t=new Date(d);if(!isNaN(t))return new Date(t.getTime()+9*36e5).toISOString().slice(0,10)}const m=d.match(/^(\d{4})-(\d\d)-(\d\d)/);return m?m[0]:d};
 function viewQT(){const cols=[];S.Halls.forEach(h=>S.Quotes.filter(q=>q.hall==h.id).forEach(q=>cols.push({h,q})));
  if(!cols.length)return'<div class="empty">견적을 추가하면 표로 비교돼요.</div>';
  const ok=c=>complete(c.q),cost=c=>ok(c)?costAt(c.q):null,tt=c=>ok(c)?tot(c.q):null,n=v=>String(v??'')===''?null:+v;
@@ -267,7 +267,7 @@ function viewR(){
 function viewB(){const P=bparts(),{hr,hc,items,goal}=P;
  const ho='<option value="">웨딩홀 미정 (예상 범위로 계산)</option>'+S.Halls.map(h=>`<option value="${h.id}" ${hr&&hr.hall==h.id?'selected':''}>${E(h.name)}</option>`).join('');
  const L=hc.h?S.Quotes.filter(q=>q.hall==hc.h.id):[];
- const qo='<option value="">최저 견적 자동 선택</option>'+L.map(q=>`<option value="${q.id}" ${hr&&hr.quote==q.id?'selected':''}>견적 ${qNo(q)} · ${E([q.wdate,q.time].filter(Boolean).join(' ')||'날짜 비어있음')}${complete(q)?'':' (정보 부족)'}</option>`).join('');
+ const qo='<option value="">최저 견적 자동 선택</option>'+L.map(q=>`<option value="${q.id}" ${hr&&hr.quote==q.id?'selected':''}>견적 ${qNo(q)} · ${E([ds(q.wdate),q.time].filter(Boolean).join(' ')||'날짜 비어있음')}${complete(q)?'':' (정보 부족)'}</option>`).join('');
  let det='';
  if(hc.auto){const q=hc.q,R=(l,v)=>`<dt>${l}</dt><dd>${v}</dd>`;det=`<dl class="qd" style="margin-top:10px">${R('기준 견적','견적 '+qNo(q))}${R('대관료',vv(q.hall_fee,x=>fw(+x)))}${R('생화장식',vv(q.flower,x=>fw(+x)))}${R('식대',fw(+q.meal)+' × '+hc.n+'명 = '+fw(q.meal*hc.n))}${R('기타 추가금',vv(q.extra,x=>fw(+x)))}${R('할인·혜택',vv(q.discount,x=>'−'+fw(+x)))}${R('합계',`<b>${fw(hc.amount)}</b>`)}</dl><p class="tag" style="margin:8px 0 0">대관료·식대·꽃장식은 이 견적으로 계산해요.</p>`}
  else if(hc.h)det='<p class="tag" style="margin:10px 0 0">이 웨딩홀은 대관료·식대가 채워진 견적이 없어서 아래 예상 범위로 계산해요.</p>';
@@ -281,7 +281,7 @@ function viewB(){const P=bparts(),{hr,hc,items,goal}=P;
  <div class="card"><div style="display:flex;align-items:center;gap:8px"><h3 style="margin:0;flex:1">웨딩홀 선택</h3><label class="tag" style="display:flex;gap:6px;align-items:center">확정<input type="checkbox" style="width:20px;height:20px;accent-color:var(--g)" data-bk="b_hall|fixed" ${hr&&hr.fixed=='Y'?'checked':''}></label></div>
  <label class="f">웨딩홀</label><select class="bsel" data-bk="b_hall|hall">${ho}</select>${hc.h?`<label class="f">견적</label><select class="bsel" data-bk="b_hall|quote">${qo}</select>`:''}
  <label class="f">예상 하객 수(명) · 보증인원이 더 많으면 보증인원 기준</label><input class="goal" type="number" inputmode="numeric" data-w="c7" value="${base()}">${det}</div>
- <div class="card"><h3 style="margin:0 0 2px">항목별 예상 비용</h3>${items.length?items.map(row).join(''):'<div class="empty">항목이 없어요. 아래에서 추가하세요.</div>'}<button class="add" data-ab>+ 항목 추가</button></div>
+ <div class="card"><h3 style="margin:0 0 2px">항목별 예상 비용</h3>${items.length?items.map(row).join(''):'<div class="empty">항목이 없어요. 아래에서 추가하세요.</div>'}<button class="add" data-ab>+ 항목 추가</button><button class="add" data-rb style="color:var(--sub);font-weight:600">↺ 기본 항목 복원 (없는 항목만 다시 채워요)</button></div>
  <div class="card"><label class="f" for="goal" style="margin-top:0">목표 예산(만원)</label><input id="goal" class="goal" type="number" inputmode="numeric" data-bk="_goal|amount" data-man="1" value="${goal?Math.round(goal/1e4):''}"></div>
  <div class="card"><h3 style="margin:0 0 4px">웨딩홀을 바꾸면?</h3><div id="bsim">${bSim()}</div><p class="tag">현재 슬라이더 값은 그대로 두고 웨딩홀만 각 홀의 최저 견적으로 바꿨을 때 총 비용이에요.</p></div>`}
 function render(){head();$('#main').innerHTML={ck:viewCk,h:viewH,q:viewQ,r:viewR,b:viewB}[tab]();document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.t==tab))}
@@ -300,6 +300,7 @@ document.addEventListener('click',e=>{const t=e.target,g=a=>t.dataset[a];
  else if(g('qm')){qmode=g('qm');render()}
  else if(g('pre')!=null){const v=g('pre'),ch=S.Budget.filter(x=>!BR.includes(x.id)&&hasR(x)&&x.fixed!='Y'&&String(x.pos)!==v);ch.forEach(x=>x.pos=v);localStorage.cache=JSON.stringify(S);render();if(ch.length)post('Budget','saveMany',null,ch).catch(e=>toast('저장 실패: '+e))}
  else if(t.dataset.ab!=null){const n=prompt('항목 이름');if(!n)return;const a=prompt('금액(만원) 또는 범위(예: 100~300). 비워도 돼요')||'',m=a.split('~').map(x=>parseFloat(x.replace(/,/g,''))),row={id:uid(),name:n,amount:'',fixed:'',hall:'',quote:'',memo:'',min:'',max:'',pos:''};if(m.length==2&&m.every(x=>!isNaN(x))){row.min=String(Math.min(...m)*1e4);row.max=String(Math.max(...m)*1e4);row.pos='50'}else if(!isNaN(m[0]))row.amount=String(Math.round(m[0]*1e4));save('Budget',row)}
+ else if(t.dataset.rb!=null){toast('복원 중…');post('Budget','restoreBudget').then(load).then(()=>toast('기본 항목을 복원했어요')).catch(e=>toast('복원 실패: '+e+' (Code.gs 새 버전 배포가 필요해요)'))}
  else if(g('db'))del('Budget',g('db'))
  else if(g('sc')){const[hid,c,v]=g('sc').split('|');const cur=(S.Scores||[]).find(x=>x.id==hid)||{};const row={id:hid,c1:'',c2:'',c3:'',c4:'',c5:'',c6:'',c7:'',...cur};row[c]=String(row[c])==v?'':v;save('Scores',row)}});
 document.addEventListener('input',e=>{const id=e.target.dataset.sl;if(!id)return;const row=S.Budget.find(x=>x.id==id);if(!row)return;row.pos=e.target.value;e.target.style.setProperty('--p',e.target.value+'%');const a=document.getElementById('am_'+id),l=document.getElementById('lv_'+id);if(a)a.value=manV(amt(row));if(l)l.textContent=lvl(+row.pos);refreshB()});
