@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#2f5d4e"><meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="manifest" href="manifest.json"><link rel="icon" href="icon.svg"><link rel="apple-touch-icon" href="icon.svg">
+<title>우리 결혼 준비</title>
+<style>
+:root{--bg:#f4f6f5;--card:#fff;--ink:#1f2a27;--mute:#6b7773;--line:#dfe5e2;--g:#2f5d4e;--g2:#d6e6df;--p:#e9b8b8;--warn:#b4493f}
+@media(prefers-color-scheme:dark){:root{--bg:#141a18;--card:#1d2522;--ink:#e8efec;--mute:#93a39d;--line:#2c3733;--g:#6fb79c;--g2:#27413a;--p:#c58a8a;--warn:#e08a80}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 -apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;padding-bottom:calc(72px + env(safe-area-inset-bottom))}
+header{padding:calc(18px + env(safe-area-inset-top)) 18px 14px;background:var(--g);color:#fff}
+header .top{display:flex;justify-content:space-between;align-items:flex-start}
+.pct{font-size:44px;font-weight:700;line-height:1;letter-spacing:-1px}.pct small{font-size:18px;font-weight:500}
+.seg{display:flex;gap:3px;margin-top:12px}.seg i{flex:1;height:8px;border-radius:4px;background:rgba(255,255,255,.25);overflow:hidden;display:block}.seg b{display:block;height:100%;background:var(--p)}
+.sub{opacity:.85;font-size:13px;margin-top:6px}
+button,input,select,textarea{font:inherit;color:inherit}
+.ic{background:none;border:0;color:inherit;font-size:20px;padding:4px 8px;cursor:pointer}
+main{padding:14px;max-width:760px;margin:auto}
+details{background:var(--card);border:1px solid var(--line);border-radius:12px;margin-bottom:10px}
+summary{padding:12px 14px;cursor:pointer;display:flex;justify-content:space-between;gap:10px;font-weight:600;list-style:none}
+summary::-webkit-details-marker{display:none}summary span{color:var(--mute);font-weight:400;white-space:nowrap}
+.mini{height:4px;background:var(--g2);margin:0 14px 6px;border-radius:2px;overflow:hidden}.mini b{display:block;height:100%;background:var(--g)}
+.it{display:flex;align-items:center;gap:10px;padding:9px 14px;border-top:1px solid var(--line)}
+.it input{width:22px;height:22px;accent-color:var(--g);flex:none}.it label{flex:1}.it.d label{color:var(--mute);text-decoration:line-through}
+.x{color:var(--mute);background:none;border:0;font-size:18px;padding:2px 6px}
+.add{display:block;width:100%;text-align:left;padding:10px 14px;border:0;border-top:1px solid var(--line);background:none;color:var(--g);font-weight:600}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:12px}
+.card h3{margin:0 0 2px;font-size:17px}.tag{color:var(--mute);font-size:13px}
+.best{margin:8px 0;padding:8px 10px;background:var(--g2);border-radius:8px;font-weight:600}
+dl{margin:8px 0 0;display:grid;grid-template-columns:84px 1fr;gap:4px 10px;font-size:14px}dt{color:var(--mute)}dd{margin:0;white-space:pre-wrap}
+.row{display:flex;gap:8px;margin-top:10px}.btn{padding:8px 14px;border-radius:9px;border:1px solid var(--line);background:var(--card);cursor:pointer}
+.btn.p{background:var(--g);color:#fff;border-color:var(--g);font-weight:600}.btn.w{color:var(--warn)}
+.fab{width:100%;margin-bottom:12px;padding:12px}
+nav{position:fixed;bottom:0;left:0;right:0;display:flex;background:var(--card);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom)}
+nav button{flex:1;padding:12px 0;border:0;background:none;color:var(--mute);font-weight:600}nav button.on{color:var(--g);box-shadow:inset 0 -3px var(--g)}
+dialog{border:0;border-radius:16px;padding:18px;width:min(520px,94vw);background:var(--card);color:var(--ink);max-height:90vh}
+dialog::backdrop{background:rgba(0,0,0,.45)}
+label.f{display:block;margin:10px 0 3px;font-size:13px;color:var(--mute)}
+.f+input,.f+select,.f+textarea,dialog input.w,dialog textarea{width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg)}
+.q{display:flex;justify-content:space-between;gap:10px;padding:10px 0;border-top:1px solid var(--line)}.q:first-of-type{border-top:0}
+.q b{font-variant-numeric:tabular-nums}.empty{text-align:center;color:var(--mute);padding:28px 10px}
+#toast{position:fixed;left:50%;transform:translateX(-50%);bottom:84px;background:#222;color:#fff;padding:9px 16px;border-radius:20px;font-size:14px;display:none;z-index:9}
+:focus-visible{outline:2px solid var(--g);outline-offset:2px}
+</style></head><body>
+<header><div class="top"><div><div class="sub" id="dd">결혼 준비 진행률</div><div class="pct" id="pct">0<small>%</small></div></div><button class="ic" id="cfgb" aria-label="설정">⚙</button></div>
+<div class="seg" id="seg"></div><div class="sub" id="cnt"></div></header>
+<main id="main"></main>
+<nav><button data-t="ck" class="on">체크리스트</button><button data-t="h">웨딩홀</button><button data-t="q">견적</button></nav>
+<dialog id="dlg"></dialog><div id="toast"></div>
+<script>
+const $=s=>document.querySelector(s),E=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+let cfg=JSON.parse(localStorage.cfg||'{}'),S=JSON.parse(localStorage.cache||'{"Halls":[],"Quotes":[],"Checklist":[]}'),tab='ck';
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,5);
+const won=n=>Math.round(n/1e4).toLocaleString('ko-KR')+'만원';
+const tot=q=>(+q.hall_fee||0)+(+q.flower||0)+(+q.meal||0)*(+q.guests||0)+(+q.extra||0)-(+q.discount||0);
+function toast(m){const t=$('#toast');t.textContent=m;t.style.display='block';clearTimeout(t._);t._=setTimeout(()=>t.style.display='none',2800)}
+async function load(){if(!cfg.url)return openCfg();
+ try{const d=await(await fetch(cfg.url+'?t='+encodeURIComponent(cfg.t||''))).json();if(d.error)throw d.error;S=d;localStorage.cache=JSON.stringify(d)}catch(e){toast('불러오기 실패: '+e)}render()}
+function send(tab,op,row){fetch(cfg.url,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({t:cfg.t,tab,op,row})}).then(r=>r.json()).then(d=>{if(d.error)throw d.error}).catch(e=>toast('저장 실패: '+e))}
+function save(tb,row){const L=S[tb],i=L.findIndex(x=>x.id==row.id);i<0?L.push(row):L[i]=row;localStorage.cache=JSON.stringify(S);render();send(tb,'save',row)}
+function del(tb,id){if(!confirm('삭제할까요?'))return;S[tb]=S[tb].filter(x=>x.id!=id);localStorage.cache=JSON.stringify(S);render();send(tb,'del',{id})}
+const HF=[['name','웨딩홀 이름'],['region','지역'],['location','위치·교통','t'],['parking','주차','t'],['vibe','홀 분위기','t'],['capacity','규모(좌석·버진로드·층고)','t'],['interval','예식 간격','t'],['bride','신부대기실','t'],['family','혼주·가족 공간','t'],['food','연회장·식사','t'],['pros','장점','t'],['cons','아쉬운 점','t'],['price','가격 메모','t'],['tips','예약·계약 팁','t'],['src','출처'],['memo','내 메모','t']];
+const QF=[['hall','웨딩홀','sel'],['source','견적 출처(업체·플래너)'],['qdate','견적일','date'],['wdate','예식일','date'],['time','요일·시간대'],['guests','보증인원(명)','num'],['hall_fee','대관료(원)','num'],['flower','생화장식(원)','num'],['meal','식대 1인(원)','num'],['extra','기타 추가금(원)','num'],['discount','할인·혜택(원)','num'],['memo','포함·불포함·메모','t']];
+function form(tb,F,row,title){const r={...row};const d=$('#dlg');
+ d.innerHTML=`<h3 style="margin:0 0 6px">${title}</h3><form method="dialog" id="fm">`+F.map(([k,l,t])=>`<label class="f" for="f_${k}">${l}</label>`+(t=='t'?`<textarea id="f_${k}" rows="2">${E(r[k])}</textarea>`:t=='sel'?`<select id="f_${k}">${S.Halls.map(h=>`<option value="${h.id}" ${h.id==r[k]?'selected':''}>${E(h.name)}</option>`).join('')}</select>`:`<input id="f_${k}" type="${t=='num'?'number':t=='date'?'date':'text'}" ${t=='num'?'inputmode="numeric"':''} value="${E(r[k])}">`)).join('')+`<div class="row"><button class="btn p" value="ok">저장</button><button class="btn" value="x" formnovalidate>취소</button></div></form>`;
+ $('#fm').onsubmit=e=>{if(e.submitter.value!='ok')return;F.forEach(([k])=>r[k]=$('#f_'+k).value);r.id=r.id||uid();if(tb=='Halls'&&!r.name)return toast('이름을 입력하세요');save(tb,r)};d.showModal()}
+function openCfg(){const d=$('#dlg');d.innerHTML=`<h3 style="margin:0 0 6px">설정</h3><form method="dialog" id="fm"><label class="f">Apps Script 웹앱 URL</label><input class="w" id="c_url" value="${E(cfg.url)}" placeholder="https://script.google.com/macros/s/.../exec"><label class="f">비밀번호(Code.gs의 TOKEN)</label><input class="w" id="c_t" type="password" value="${E(cfg.t)}"><label class="f">결혼식 날짜(D-day 표시용)</label><input class="w" id="c_d" type="date" value="${E(cfg.wdate)}"><div class="row"><button class="btn p" value="ok">저장</button><button class="btn" value="x" formnovalidate>닫기</button></div></form>`;
+ $('#fm').onsubmit=e=>{if(e.submitter.value!='ok')return;cfg={url:$('#c_url').value.trim(),t:$('#c_t').value,wdate:$('#c_d').value};localStorage.cfg=JSON.stringify(cfg);load()};d.showModal()}
+function head(){const L=S.Checklist,ph=[...new Set(L.map(x=>x.phase))],dn=L.filter(x=>x.done=='Y').length,p=L.length?Math.round(dn/L.length*100):0;
+ $('#pct').innerHTML=p+'<small>%</small>';$('#cnt').textContent=`${dn} / ${L.length}개 완료`;
+ $('#seg').innerHTML=ph.map(n=>{const a=L.filter(x=>x.phase==n),c=a.filter(x=>x.done=='Y').length;return`<i title="${E(n)}"><b style="width:${c/a.length*100}%"></b></i>`}).join('');
+ if(cfg.wdate){const n=Math.ceil((new Date(cfg.wdate)-new Date().setHours(0,0,0,0))/864e5);$('#dd').textContent=n>0?`결혼식까지 D-${n}`:n==0?'오늘이 결혼식 💍':'결혼 준비 진행률'}}
+function viewCk(){const L=S.Checklist,ph=[...new Set(L.map(x=>x.phase))];if(!ph.length)return'<div class="empty">불러오는 중이거나 아직 항목이 없어요.<br>설정에서 웹앱 URL을 확인하세요.</div>';
+ return ph.map((n,i)=>{const a=L.filter(x=>x.phase==n),c=a.filter(x=>x.done=='Y').length;
+ return`<details ${c<a.length&&!document.querySelector('details[open]')&&i==ph.findIndex(p=>L.some(x=>x.phase==p&&x.done!='Y'))?'open':''} data-p="${E(n)}"><summary>${E(n)}<span>${c}/${a.length}</span></summary><div class="mini"><b style="width:${c/a.length*100}%"></b></div>`+a.map(x=>`<div class="it ${x.done=='Y'?'d':''}"><input type="checkbox" id="k${x.id}" ${x.done=='Y'?'checked':''} data-id="${x.id}"><label for="k${x.id}">${E(x.text)}</label><button class="x" data-del="${x.id}" aria-label="삭제">×</button></div>`).join('')+`<button class="add" data-add="${E(n)}">+ 항목 추가</button></details>`}).join('')+'<button class="btn fab" data-addp>+ 새 단계 만들기</button>'}
+function viewH(){const H=S.Halls;return'<button class="btn p fab" data-newh>+ 웨딩홀 추가</button>'+(H.length?H.map(h=>{const qs=S.Quotes.filter(q=>q.hall==h.id).map(tot).filter(x=>x>0),m=qs.length?Math.min(...qs):0;
+ return`<div class="card"><h3>${E(h.name)}</h3><div class="tag">${E(h.region)}</div>${m?`<div class="best">최저 견적 ${won(m)} (${qs.length}건)</div>`:''}<dl>${HF.slice(2).filter(f=>h[f[0]]).map(f=>`<dt>${f[1].replace(/\(.*\)/,'')}</dt><dd>${E(h[f[0]])}</dd>`).join('')}</dl><div class="row"><button class="btn" data-eh="${h.id}">수정</button><button class="btn" data-nq="${h.id}">견적 추가</button><button class="btn w" data-dh="${h.id}">삭제</button></div></div>`}).join(''):'<div class="empty">웨딩홀을 추가해 보세요.</div>')}
+function viewQ(){const Q=[...S.Quotes].sort((a,b)=>tot(a)-tot(b));return'<button class="btn p fab" data-nq="">+ 견적 추가</button>'+(Q.length?`<div class="card">`+Q.map(q=>{const h=S.Halls.find(x=>x.id==q.hall),t=tot(q);return`<div class="q"><div><b>${E(h?h.name:'(삭제된 웨딩홀)')}</b><div class="tag">${E([q.wdate,q.time,q.guests&&q.guests+'명',q.source].filter(Boolean).join(' · '))}</div><div class="tag">${E(q.memo)}</div><div class="row" style="margin-top:4px"><button class="btn" data-eq="${q.id}">수정</button><button class="btn w" data-dq="${q.id}">삭제</button></div></div><div style="text-align:right"><b>${won(t)}</b><div class="tag">${+q.guests?'1인 '+won(t/q.guests):''}</div></div></div>`}).join('')+'</div>':'<div class="empty">받은 견적을 입력하면 총액 순으로 비교돼요.<br>총액 = 대관료 + 생화 + 식대×인원 + 기타 − 할인</div>')}
+function render(){head();$('#main').innerHTML={ck:viewCk,h:viewH,q:viewQ}[tab]();document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.t==tab))}
+document.addEventListener('click',e=>{const t=e.target,g=a=>t.dataset[a];
+ if(t.dataset.t){tab=g('t');render();scrollTo(0,0)}
+ else if(t.id=='cfgb')openCfg();
+ else if(g('del')!=null)del('Checklist',g('del'));
+ else if(g('add')){const x=prompt('추가할 항목');if(x)save('Checklist',{id:uid(),phase:g('add'),text:x,done:''})}
+ else if(t.dataset.addp!=null){const p=prompt('새 단계 이름');const x=p&&prompt('첫 항목');if(x)save('Checklist',{id:uid(),phase:p,text:x,done:''})}
+ else if(t.dataset.newh!=null)form('Halls',HF,{},'웨딩홀 추가');
+ else if(g('eh'))form('Halls',HF,S.Halls.find(x=>x.id==g('eh')),'웨딩홀 수정');
+ else if(g('dh'))del('Halls',g('dh'));
+ else if(g('nq')!=null){if(!S.Halls.length)return toast('웨딩홀을 먼저 추가하세요');form('Quotes',QF,{hall:g('nq')||S.Halls[0].id},'견적 추가')}
+ else if(g('eq'))form('Quotes',QF,S.Quotes.find(x=>x.id==g('eq')),'견적 수정');
+ else if(g('dq'))del('Quotes',g('dq'))});
+document.addEventListener('change',e=>{const id=e.target.dataset.id;if(!id)return;const x=S.Checklist.find(i=>i.id==id);const o=document.querySelector(`details[data-p="${CSS.escape(x.phase)}"]`).open;save('Checklist',{...x,done:e.target.checked?'Y':''});const d=document.querySelector(`details[data-p="${CSS.escape(x.phase)}"]`);if(d)d.open=true});
+if('serviceWorker'in navigator)navigator.serviceWorker.register('sw.js');
+render();load();
+</script></body></html>
