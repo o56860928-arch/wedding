@@ -74,7 +74,7 @@ nav button{font-size:14px}
 <dialog id="dlg"></dialog><div id="toast"></div>
 <script>
 const $=s=>document.querySelector(s),E=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const API='https://script.google.com/macros/s/AKfycbyThl_HygkXnE5xHJ9QnSajQSYWZrbyrV2-h573cYjhuKI6wYRMS8nC--WkGNyabtUn/exec';
+const API='https://script.google.com/macros/s/AKfycbzdTjA5x59IaTSJwSMDW5Yv2RUt6LaYwM-SMuoaFA9mNoWgsl6C-FBs3yK3xCn2-6C8/exec';
 let cfg=JSON.parse(localStorage.cfg||'{}'),S=JSON.parse(localStorage.cache||'{"Halls":[],"Quotes":[],"Checklist":[],"Scores":[],"Budget":[]}'),tab='ck';
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,5);
 const won=n=>Math.round(n/1e4).toLocaleString('ko-KR')+'만원';
@@ -115,6 +115,7 @@ function refreshB(){const a=$('#bsum'),b=$('#bsim');if(a)a.innerHTML=bSum();if(b
 function toast(m){const t=$('#toast');t.textContent=m;t.style.display='block';clearTimeout(t._);t._=setTimeout(()=>t.style.display='none',2800)}
 const SEED_H=[{id:'h5',name:'양재 엘블레스',region:'서울 양재',memo:'블로그 #5: aT포레보다 화려하고 층고는 더 낮다는 비교'}];
 const SEED_Q=[
+{id:'qs12',hall:'h0',wdate:'2027-09-25',time:'토 16:00',guests:200,hall_fee:4800000,flower:6500000,meal:78000,extra:2700000,drink:0,deposit:3000000,incl:'생화장식에 BASIC-flower 랩핑 50개 포함',perk:'당일 혜택: 폐백(100만원) 무료 · 포토 방명록(55만원) 무료 · 플라워 샤워(55만원) 무료 · 2부 웨딩 케이크(55만원): 1단 케이크+샴페인 무료 · 현장 계약 혜택',memo:'2027년 하반기 견적. 정가: 식대 93,000원·대관료 800만원 → 할인가: 식대 78,000원·대관료 480만원(생화 650만원은 할인 없음). 기타 추가금 270만원 = 필수사항(원판 촬영 65만+전문 사회자 65만+컨시어즈 65만+혼성 4중창 75만). 주류: 와인(병당 69,000원)·생맥주(99만원)는 서비스(SV) 제공. 부가세 포함. 무료·SV 혜택은 합계에서 제외. 합계 2,960만원'},
 {id:'qs10',hall:'h1',wdate:'2027-09-25',time:'토 11:00',guests:250,hall_fee:7000000,meal:75000,child:45000,drink:0,deposit:2000000,incl:'예식홀 사용료, 웨딩 연출비, 웨딩 데코레이션(플라워), 웨딩홀야외정원, 혼주대기실, 혼구용품',perk:'방문 후기 이벤트: 혼성4중창 · 전문사회자 · 포토존&포토테이블 · 웨딩컨시어지(도우미 6명) · 플라워세레머니(친구섭외, 꽃바구니 4EA 준비)',memo:'보증인원 250명 기준. 식대에 음료·주류 서비스 포함. 계약금은 14일 이내 취소 시 전액 환불'},
 {id:'qs11',hall:'h1',wdate:'2027-09-26',time:'일 11:00',guests:250,hall_fee:5500000,meal:66000,child:45000,drink:0,deposit:2000000,incl:'예식홀 사용료, 웨딩 연출비, 웨딩 데코레이션(플라워), 웨딩홀야외정원, 혼주대기실, 혼구용품',perk:'방문 후기 이벤트: 혼성4중창 · 전문사회자 · 포토존&포토테이블 · 웨딩컨시어지(도우미 6명) · 플라워세레머니(친구섭외, 꽃바구니 4EA 준비)',memo:'보증인원 250명 기준. 식대에 음료·주류 서비스 포함. 계약금은 14일 이내 취소 시 전액 환불'},
 {id:'qs1',hall:'h3',time:'일요일 15시',hall_fee:6400000,meal:81000,discount:500000,perk:'당일계약 시 50만원 할인(할인·혜택에 반영)',memo:'보증인원·예식 날짜는 견적 글에 없었음'},
@@ -161,6 +162,13 @@ async function seedOnce(d){
    const up=SEED_Q.filter(q=>['qs10','qs11'].includes(q.id)&&!S.Quotes.some(x=>x.id==q.id));
    if(up.length){await post('Quotes','saveMany',null,up);S.Quotes.push(...up)}
    localStorage.seedQ4='1';localStorage.cache=JSON.stringify(S);toast('aT포레 견적 2건을 추가했어요')
+  }catch(e){toast('견적 추가 실패: '+e)}
+ }
+ if(v2&&!localStorage.seedQ5){
+  try{
+   const up=SEED_Q.filter(q=>q.id=='qs12'&&!S.Quotes.some(x=>x.id==q.id));
+   if(up.length){await post('Quotes','saveMany',null,up);S.Quotes.push(...up)}
+   localStorage.seedQ5='1';localStorage.cache=JSON.stringify(S);toast('더마레보 견적을 추가했어요')
   }catch(e){toast('견적 추가 실패: '+e)}
  }
  try{
