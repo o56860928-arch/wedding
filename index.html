@@ -42,21 +42,22 @@ label.f{display:block;margin:10px 0 3px;font-size:13px;color:var(--mute)}
 #toast{position:fixed;left:50%;transform:translateX(-50%);bottom:84px;background:#222;color:#fff;padding:9px 16px;border-radius:20px;font-size:14px;display:none;z-index:9}
 :focus-visible{outline:2px solid var(--g);outline-offset:2px}
 </style></head><body>
-<header><div class="top"><div><div class="sub" id="dd">결혼 준비 진행률</div><div class="pct" id="pct">0<small>%</small></div></div><button class="ic" id="cfgb" aria-label="설정">⚙</button></div>
+<header><div class="top"><div><div class="sub" id="dd">결혼 준비 진행률</div><div class="pct" id="pct">0<small>%</small></div></div></div>
 <div class="seg" id="seg"></div><div class="sub" id="cnt"></div></header>
 <main id="main"></main>
 <nav><button data-t="ck" class="on">체크리스트</button><button data-t="h">웨딩홀</button><button data-t="q">견적</button></nav>
 <dialog id="dlg"></dialog><div id="toast"></div>
 <script>
 const $=s=>document.querySelector(s),E=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const API='https://script.google.com/macros/s/AKfycbzdTjA5x59IaTSJwSMDW5Yv2RUt6LaYwM-SMuoaFA9mNoWgsl6C-FBs3yK3xCn2-6C8/exec';
 let cfg=JSON.parse(localStorage.cfg||'{}'),S=JSON.parse(localStorage.cache||'{"Halls":[],"Quotes":[],"Checklist":[]}'),tab='ck';
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,5);
 const won=n=>Math.round(n/1e4).toLocaleString('ko-KR')+'만원';
 const tot=q=>(+q.hall_fee||0)+(+q.flower||0)+(+q.meal||0)*(+q.guests||0)+(+q.extra||0)-(+q.discount||0);
 function toast(m){const t=$('#toast');t.textContent=m;t.style.display='block';clearTimeout(t._);t._=setTimeout(()=>t.style.display='none',2800)}
-async function load(){if(!cfg.url)return openCfg();
- try{const d=await(await fetch(cfg.url+'?t='+encodeURIComponent(cfg.t||''))).json();if(d.error)throw d.error;S=d;localStorage.cache=JSON.stringify(d)}catch(e){toast('불러오기 실패: '+e)}render()}
-function send(tab,op,row){fetch(cfg.url,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({t:cfg.t,tab,op,row})}).then(r=>r.json()).then(d=>{if(d.error)throw d.error}).catch(e=>toast('저장 실패: '+e))}
+async function load(){
+ try{const d=await(await fetch(API)).json();if(d.error)throw d.error;S=d;localStorage.cache=JSON.stringify(d)}catch(e){toast('불러오기 실패: '+e)}render()}
+function send(tab,op,row){fetch(API,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({tab,op,row})}).then(r=>r.json()).then(d=>{if(d.error)throw d.error}).catch(e=>toast('저장 실패: '+e))}
 function save(tb,row){const L=S[tb],i=L.findIndex(x=>x.id==row.id);i<0?L.push(row):L[i]=row;localStorage.cache=JSON.stringify(S);render();send(tb,'save',row)}
 function del(tb,id){if(!confirm('삭제할까요?'))return;S[tb]=S[tb].filter(x=>x.id!=id);localStorage.cache=JSON.stringify(S);render();send(tb,'del',{id})}
 const HF=[['name','웨딩홀 이름'],['region','지역'],['location','위치·교통','t'],['parking','주차','t'],['vibe','홀 분위기','t'],['capacity','규모(좌석·버진로드·층고)','t'],['interval','예식 간격','t'],['bride','신부대기실','t'],['family','혼주·가족 공간','t'],['food','연회장·식사','t'],['pros','장점','t'],['cons','아쉬운 점','t'],['price','가격 메모','t'],['tips','예약·계약 팁','t'],['src','출처'],['memo','내 메모','t']];
@@ -64,13 +65,13 @@ const QF=[['hall','웨딩홀','sel'],['source','견적 출처(업체·플래너)
 function form(tb,F,row,title){const r={...row};const d=$('#dlg');
  d.innerHTML=`<h3 style="margin:0 0 6px">${title}</h3><form method="dialog" id="fm">`+F.map(([k,l,t])=>`<label class="f" for="f_${k}">${l}</label>`+(t=='t'?`<textarea id="f_${k}" rows="2">${E(r[k])}</textarea>`:t=='sel'?`<select id="f_${k}">${S.Halls.map(h=>`<option value="${h.id}" ${h.id==r[k]?'selected':''}>${E(h.name)}</option>`).join('')}</select>`:`<input id="f_${k}" type="${t=='num'?'number':t=='date'?'date':'text'}" ${t=='num'?'inputmode="numeric"':''} value="${E(r[k])}">`)).join('')+`<div class="row"><button class="btn p" value="ok">저장</button><button class="btn" value="x" formnovalidate>취소</button></div></form>`;
  $('#fm').onsubmit=e=>{if(e.submitter.value!='ok')return;F.forEach(([k])=>r[k]=$('#f_'+k).value);r.id=r.id||uid();if(tb=='Halls'&&!r.name)return toast('이름을 입력하세요');save(tb,r)};d.showModal()}
-function openCfg(){const d=$('#dlg');d.innerHTML=`<h3 style="margin:0 0 6px">설정</h3><form method="dialog" id="fm"><label class="f">Apps Script 웹앱 URL</label><input class="w" id="c_url" value="${E(cfg.url)}" placeholder="https://script.google.com/macros/s/.../exec"><label class="f">비밀번호(Code.gs의 TOKEN)</label><input class="w" id="c_t" type="password" value="${E(cfg.t)}"><label class="f">결혼식 날짜(D-day 표시용)</label><input class="w" id="c_d" type="date" value="${E(cfg.wdate)}"><div class="row"><button class="btn p" value="ok">저장</button><button class="btn" value="x" formnovalidate>닫기</button></div></form>`;
- $('#fm').onsubmit=e=>{if(e.submitter.value!='ok')return;cfg={url:$('#c_url').value.trim(),t:$('#c_t').value,wdate:$('#c_d').value};localStorage.cfg=JSON.stringify(cfg);load()};d.showModal()}
+function openCfg(){const d=$('#dlg');d.innerHTML=`<h3 style="margin:0 0 6px">설정</h3><form method="dialog" id="fm"><label class="f">결혼식 날짜(D-day 표시용)</label><input class="w" id="c_d" type="date" value="${E(cfg.wdate)}"><div class="row"><button class="btn p" value="ok">저장</button><button class="btn" value="x" formnovalidate>닫기</button></div></form>`;
+ $('#fm').onsubmit=e=>{if(e.submitter.value!='ok')return;cfg={wdate:$('#c_d').value};localStorage.cfg=JSON.stringify(cfg);render()};d.showModal()}
 function head(){const L=S.Checklist,ph=[...new Set(L.map(x=>x.phase))],dn=L.filter(x=>x.done=='Y').length,p=L.length?Math.round(dn/L.length*100):0;
  $('#pct').innerHTML=p+'<small>%</small>';$('#cnt').textContent=`${dn} / ${L.length}개 완료`;
  $('#seg').innerHTML=ph.map(n=>{const a=L.filter(x=>x.phase==n),c=a.filter(x=>x.done=='Y').length;return`<i title="${E(n)}"><b style="width:${c/a.length*100}%"></b></i>`}).join('');
  if(cfg.wdate){const n=Math.ceil((new Date(cfg.wdate)-new Date().setHours(0,0,0,0))/864e5);$('#dd').textContent=n>0?`결혼식까지 D-${n}`:n==0?'오늘이 결혼식 💍':'결혼 준비 진행률'}}
-function viewCk(){const L=S.Checklist,ph=[...new Set(L.map(x=>x.phase))];if(!ph.length)return'<div class="empty">불러오는 중이거나 아직 항목이 없어요.<br>설정에서 웹앱 URL을 확인하세요.</div>';
+function viewCk(){const L=S.Checklist,ph=[...new Set(L.map(x=>x.phase))];if(!ph.length)return'<div class="empty">불러오는 중이거나 아직 항목이 없어요.<br>잠시 후 새로고침해 보세요.</div>';
  return ph.map((n,i)=>{const a=L.filter(x=>x.phase==n),c=a.filter(x=>x.done=='Y').length;
  return`<details ${c<a.length&&!document.querySelector('details[open]')&&i==ph.findIndex(p=>L.some(x=>x.phase==p&&x.done!='Y'))?'open':''} data-p="${E(n)}"><summary>${E(n)}<span>${c}/${a.length}</span></summary><div class="mini"><b style="width:${c/a.length*100}%"></b></div>`+a.map(x=>`<div class="it ${x.done=='Y'?'d':''}"><input type="checkbox" id="k${x.id}" ${x.done=='Y'?'checked':''} data-id="${x.id}"><label for="k${x.id}">${E(x.text)}</label><button class="x" data-del="${x.id}" aria-label="삭제">×</button></div>`).join('')+`<button class="add" data-add="${E(n)}">+ 항목 추가</button></details>`}).join('')+'<button class="btn fab" data-addp>+ 새 단계 만들기</button>'}
 function viewH(){const H=S.Halls;return'<button class="btn p fab" data-newh>+ 웨딩홀 추가</button>'+(H.length?H.map(h=>{const qs=S.Quotes.filter(q=>q.hall==h.id).map(tot).filter(x=>x>0),m=qs.length?Math.min(...qs):0;
