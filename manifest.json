@@ -1,1 +1,1 @@
-{"name":"우리 결혼 준비","short_name":"결혼준비","start_url":".","display":"standalone","background_color":"#f4f6f5","theme_color":"#2f5d4e","icons":[{"src":"icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any"}]}
+{"name": "우리 결혼 준비", "short_name": "결혼준비", "start_url": ".", "display": "standalone", "background_color": "#F2F5F3", "theme_color": "#17493A", "icons": [{"src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any"}]}
