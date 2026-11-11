@@ -42,7 +42,7 @@ main{padding:2px 12px 16px;max-width:720px;margin:auto}
 .seg{display:flex;gap:4px}.seg i{flex:1;height:6px;border-radius:3px;background:rgba(255,255,255,.2);overflow:hidden;display:block}.seg b{display:block;height:100%;background:var(--rose);border-radius:3px;transition:width .3s}
 .hero .cnt{margin-top:12px;font-size:var(--fs-sm);color:rgba(255,255,255,.8)}
 .hero2{padding:12px 16px;border-radius:16px}
-.hero2 .tag{color:rgba(255,255,255,.72)}.hero2 .big{color:#fff;margin:2px 0 4px}
+.hero2 .tag{color:rgba(255,255,255,.72)}.hero2 .big{color:#fff;margin:0}.hs{display:flex;justify-content:space-between;align-items:flex-end;gap:10px}.hs .hr{text-align:right;line-height:1.35}.hero2 .bar{margin:8px 0 6px}
 .hero2 .bar{background:rgba(255,255,255,.2)}.hero2 .bar b{background:var(--rose)}
 .stick{position:sticky;top:calc(var(--bar) + env(safe-area-inset-top) + 6px);z-index:15;box-shadow:0 8px 20px -8px rgba(0,0,0,.35)}
 
@@ -166,6 +166,11 @@ input[type=range].sl{-webkit-appearance:none;appearance:none;width:100%;height:3
 .rs .tot{font-size:20px;font-weight:800;letter-spacing:-.03em;line-height:1.2}.rs .tot small{font-size:11px;font-weight:600;color:var(--sub);margin-left:2px}
 .rs .rn{display:inline-grid;place-items:center;width:20px;height:20px;border-radius:50%;background:var(--tint);color:var(--brand);font-size:11px;font-weight:800;margin-right:6px}
 .rs .rn.top{background:var(--brand);color:var(--on-brand)}
+.chs{display:flex;flex-wrap:wrap;gap:5px;margin:8px 0 0}.cp{font-size:var(--fs-sm);padding:4px 10px;border-radius:99px;line-height:1.35}
+.cp.pro{background:var(--tint);color:var(--brand)}.cp.pro::before{content:"+ ";font-weight:800}
+.cp.con{background:color-mix(in srgb,var(--warn) 12%,transparent);color:var(--warn)}.cp.con::before{content:"− ";font-weight:800}
+.fs{padding:8px 0;border-top:1px solid var(--line)}.fs:first-child{margin-top:4px}.fl{font-size:var(--fs-xs);font-weight:700;color:var(--sub);margin-bottom:3px;letter-spacing:0}
+ul.il{margin:0;padding:0;list-style:none}.il li{position:relative;padding-left:13px;line-height:1.45;word-break:keep-all}.il li+li{margin-top:2px}.il li::before{content:"";position:absolute;left:2px;top:.62em;width:4px;height:4px;border-radius:50%;background:var(--brand)}
 details.hd{border:0;background:transparent;margin:6px 0 0;border-radius:0}.hd>summary{padding:8px 0 2px;font-size:var(--fs-sm);color:var(--brand)}.hd>summary span{display:none}
 .chips{display:flex;gap:6px;overflow-x:auto;margin:0 -12px;padding:2px 12px 10px;scrollbar-width:none;-webkit-overflow-scrolling:touch}.chips::-webkit-scrollbar{display:none}
 .chp{flex:none;max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border:1px solid var(--line2);background:var(--surface);border-radius:99px;padding:6px 12px;font-weight:600;font-size:var(--fs-sm)}
@@ -173,7 +178,8 @@ details.hd{border:0;background:transparent;margin:6px 0 0;border-radius:0}.hd>su
 .th{display:flex;align-items:center;gap:10px;margin:0 0 8px}.th>div{flex:1;min-width:0}.th b{font-size:var(--fs-lg);letter-spacing:-.02em}.th .btn{min-height:36px;font-size:var(--fs-sm);padding:0 12px;flex:none}
 .tq{padding:7px 14px 9px;border-top:1px solid var(--line)}
 .tq>label{display:block;font-size:var(--fs-sm);color:var(--sub);font-weight:600;margin:0 0 4px;line-height:1.35}
-.tin{display:flex;gap:6px;align-items:flex-start}.tin textarea{flex:1;min-height:38px;max-height:45vh;padding:8px 10px;resize:none;field-sizing:content}
+.tin{display:flex;gap:6px;align-items:flex-start}textarea::placeholder,input::placeholder{color:var(--sub);opacity:.5}
+.tin textarea{flex:1;min-height:38px;max-height:45vh;padding:8px 10px;resize:none;field-sizing:content}
 .yn{display:flex;gap:4px;flex:none}.yn button{width:38px;height:38px;border-radius:var(--r-sm);border:1px solid var(--line2);background:var(--surface);font-weight:800;color:var(--sub);padding:0}
 .yn button.on{background:var(--brand);color:var(--on-brand);border-color:var(--brand)}.yn button.on[data-yn$="|X"]{background:var(--warn);border-color:var(--warn);color:#fff}
 .tq.lk{display:flex;align-items:center;gap:10px;background:var(--tint);font-size:var(--fs-sm);color:var(--brand);font-weight:600}.tq.lk span{flex:1}.tq.lk .btn{min-height:34px;font-size:var(--fs-sm)}
@@ -217,6 +223,7 @@ const TQ=[
 ['기타 시설',[['t97','엘베 개수'],['t98','화장실 청결상태'],['t99','화장실 칸수'],['t100','ATM 여부','y'],['t101','식장 층수'],['t102','연회장 층수']]],
 ['투어 총평',[['tmemo','총평·느낌·다시 확인할 것','L']]]
 ];
+const TE={"t2":"90분","t3":"앞팀 있음","t13":"계약인원초과시 합산, 미달시 각 설정 인원 금액 결제","t14":"신랑신부만 제공","t15":"혼주, 가족 보증인원에 포함","t16":"1달전, 10일전(상향만 가능)","t17":"X","t19":"카드결제 진행","t20":"가능","t21":"포함됨","t22":"X","t23":"X","t24":"30만원","t25":"당일 18시 30분 까지","t26":"예식일 150일 이전, 30만원 제외 금액 환불","t27":"예식 150일 이전 30만원/ 이후 환불 불가","t28":"예식일 150일 이전","t29":"제니하우스(서래) 20만원부터 시작","t31":"공유 (4,5층으로 나뉘어 최대한 안섞임)","t32":"2시간(식전 30분 부터 가능)","t33":"서비스 제공","t34":"뷔페","t35":"사용 권장","t36":"와인, 홍삼(내년에 없을 수 있음)","t37":"불가","t38":"X","t40":"외부 업체 사용해야함","t41":"별도 예약 필요","t42":"4층 식당 옆 탈의실, 보관함 이용","t43":"서비스 제공","t44":"대관료 포함됨","t45":"1:1 팔로업+ 예식 도우미 4명","t46":"기계식(자동)","t47":"제공됨","t48":"별도 추가 옵션 없음","t50":"170명","t51":"230명","t52":"단독","t53":"23M/ 5M","t54":"90분(사전30,본식30,사진30)","t55":"16:30/18:00","t57":"있음","t58":"15시 30부터 이용 가능","t59":"홀 바로 옆","t60":"쿠키, 생수, 탄산수 제공 됨","t61":"쾌적함","t62":"있음(넓고 깨끗)","t63":"밝고 예쁨","t65":"16:30부터 가능/전날도 요청시 가능","t66":"1개 중앙","t67":"보통 사이즈","t68":"있음","t69":"점등됨","t70":"4개","t71":"3개","t72":"3개까지 가능(축가 별도)","t73":"가능(시간만 준수 필)","t74":"4중주 서비스 제공","t76":"1층에 화환 가능","t77":"좁은편","t78":"서비스 제공","t79":"1개 우드톤","t80":"홀에서 예식 후 촬영","t81":"가능","t82":"없음","t83":"라이트댓, 이브닝글로우","t85":"6시간 5대 지원","t86":"2시간","t87":"지하 100대, 근처 200대","t88":"초과된 적 없음","t89":"가능함(별도 문의)","t90":"신반포에서 10분에 1회","t91":"신반포 10분, 고터 20분","t92":"강남이라 권장안함","t94":"10명 내외","t95":"300대","t97":"2개","t98":"청결함(3간 정도)","t99":"한층에 3칸 정도","t100":"지하 1층, 신도림역 등에 있음","t101":"2층(계단 사용 가능)","t102":"4층 또는 5층"};
 const TQA=TQ.flatMap(([sec,a],si)=>a.map(([k,l,y])=>({k,l,y,sec,si})));
 let tHall='',tMode='in',tDiff=false;try{tHall=localStorage.tHall||''}catch(_){}
 const openT=new Set([0]),pendT=new Map(),tTim={};
@@ -238,7 +245,7 @@ function viewTI(M){const h=S.Halls.find(x=>x.id==tHall),N=TQA.length,n=TQA.filte
  return head+TQ.map(([sec,items,lk],si)=>{const c=items.filter(([k])=>(M[h.id+'.'+k]||'').trim()).length;
   return`<details class="tsec" data-ts="${si}" ${openT.has(si)?'open':''}><summary>${E(sec)}<span id="ts_${si}">${c}/${items.length}</span></summary>`+
   (lk?`<div class="tq lk"><span>대관료·계약금·보증인원·식대는 견적으로 입력해요</span><button class="btn" data-nq="${h.id}">견적 입력</button></div>`:'')+
-  items.map(([k,l,y])=>{const v=M[h.id+'.'+k]||'';return`<div class="tq"><label for="tf_${k}">${E(l)}</label><div class="tin">${y=='y'?`<span class="yn"><button data-yn="${k}|O" class="${v=='O'?'on':''}" aria-label="O">O</button><button data-yn="${k}|X" class="${v=='X'?'on':''}" aria-label="X">X</button></span>`:''}<textarea id="tf_${k}" rows="${y=='L'?3:1}" data-tq="${k}" enterkeyhint="done">${E(v)}</textarea></div></div>`}).join('')+`</details>`}).join('')+
+  items.map(([k,l,y])=>{const v=M[h.id+'.'+k]||'';return`<div class="tq"><label for="tf_${k}">${E(l)}</label><div class="tin">${y=='y'?`<span class="yn"><button data-yn="${k}|O" class="${v=='O'?'on':''}" aria-label="O">O</button><button data-yn="${k}|X" class="${v=='X'?'on':''}" aria-label="X">X</button></span>`:''}<textarea id="tf_${k}" rows="${y=='L'?3:1}" data-tq="${k}" enterkeyhint="done" placeholder="${TE[k]?'예) '+E(TE[k]):k=='tmemo'?'예) 전체적인 느낌, 다시 확인할 것, 가족 의견':''}">${E(v)}</textarea></div></div>`}).join('')+`</details>`}).join('')+
   '<p class="note" style="margin-top:12px">입력하면 바로 구글 시트에 저장돼요. O / X 버튼을 누르면 빠르게 답할 수 있고, 한 번 더 누르면 지워져요.</p>'}
 function viewTC(M){const hs=S.Halls.filter(h=>TQA.some(q=>(M[h.id+'.'+q.k]||'').trim()));
  if(!hs.length)return'<div class="empty">아직 입력한 투어 내용이 없어요.<br>입력 탭에서 웨딩홀별로 적어보세요.</div>';
@@ -250,6 +257,8 @@ function viewT(){if(!S.Halls.length)return'<div class="empty">웨딩홀을 먼�
 let zv='m';try{zv=localStorage.z||'m'}catch(_){}document.documentElement.dataset.z=zv;
 function cycleZ(){zv=zv=='m'?'l':zv=='l'?'s':'m';document.documentElement.dataset.z=zv;try{localStorage.z=zv}catch(_){}toast('글자 크기: '+({s:'작게',m:'보통',l:'크게'}[zv]))}
 
+const splitI=t=>{const s=String(t??''),o=[];let d=0,cur='';for(let i=0;i<s.length;i++){const c=s[i];if(c=='('||c=='（')d++;if(c==')'||c=='）')d=Math.max(0,d-1);if(!d&&(c=='·'||c=='/'||c=='\n'||(c==','&&/\s/.test(s[i+1]||'')))){if(cur.trim())o.push(cur.trim());cur='';continue}cur+=c}if(cur.trim())o.push(cur.trim());return o};
+const lst=t=>{const a=splitI(t);return a.length<2?E(String(t).trim()):`<ul class="il">${a.map(x=>`<li>${E(x)}</li>`).join('')}</ul>`};
 const cut=(t,n)=>{t=String(t||'').trim();if(t.length>n)t=t.slice(0,n-1)+'…';else if((t.match(/\(/g)||[]).length>(t.match(/\)/g)||[]).length)t+='…)';return t};
 const segs=(t,k)=>/확인\s*필요|비공개/.test(String(t||''))?'':String(t||'').split(/\s*[\/,·]\s*/).filter(x=>x&&!/확인\s*필요|비공개/.test(x)).slice(0,k).join(' · ');
 function viewRS(){
@@ -283,14 +292,14 @@ const BR=['b_hall','_goal'],HRW=['r_fee','r_meal','r_flower'];
 const unitF=r=>r.id=='r_meal'?base():1;
 const hasR=r=>String(r.min??'')!==''&&String(r.max??'')!=='';
 const posOf=r=>String(r.pos??'')===''?50:+r.pos;
-const amt=(r,p)=>hasR(r)?Math.round((+r.min+(+r.max-+r.min)*(p==null?posOf(r):p)/100)*unitF(r)/1000)*1000:Math.round(+r.amount||0);
+const amt=(r,p)=>hasR(r)?Math.round((+r.min+(+r.max-+r.min)*(p==null?posOf(r):p)/100)*unitF(r)/1e4)*1e4:Math.round(+r.amount||0);
 const lvl=p=>p<=25?'최저권':p<=45?'낮은 편':p<=55?'중간':p<=75?'높은 편':'고가권';
 const fm=v=>{const m=v/1e4;return (Number.isInteger(m)?m:Math.round(m*10)/10).toLocaleString('ko-KR')+'만'};
-const manV=v=>v?String(Math.round(v/1e3)/10):'';
+const manV=v=>v?String(Math.round(v/1e4)):'';
 function bparts(){const rows=S.Budget,hr=rows.find(x=>x.id=='b_hall'),goal=+((rows.find(x=>x.id=='_goal')||{}).amount)||0,hc=hallCalc(hr),items=rows.filter(x=>!BR.includes(x.id)),live=items.filter(x=>!(hc.auto&&HRW.includes(x.id))),fx=x=>x.fixed=='Y';
  const sum=live.reduce((a,x)=>a+amt(x),0),lo=live.reduce((a,x)=>a+(hasR(x)&&!fx(x)?amt(x,0):amt(x)),0),hi=live.reduce((a,x)=>a+(hasR(x)&&!fx(x)?amt(x,100):amt(x)),0),hallAmt=hc.auto?hc.amount:0;
  return{hr,items,live,goal,hc,sum,hallAmt,total:hallAmt+sum,lo:hallAmt+lo,hi:hallAmt+hi,fixed:(hc.auto&&hr&&hr.fixed=='Y'?hallAmt:0)+live.filter(fx).reduce((a,x)=>a+amt(x),0)}}
-function bSum(){const{goal,total,fixed,lo,hi}=bparts(),left=goal-total;return`<div class="tag">예상 총 비용</div><div class="big">${fw(total)}</div><div class="tag">최저 ${won(lo)} ~ 고가 ${won(hi)}</div>`+(goal?`<div class="bar"><b style="width:${Math.min(100,total/goal*100)}%;${total>goal?'background:var(--warn)':''}"></b></div><div class="tag">목표 ${won(goal)} · ${left>=0?'남음 '+won(left):'<span style="color:var(--warn)">초과 '+won(-left)+'</span>'}</div>`:'<div class="tag">목표 예산을 입력하면 남은 금액이 보여요</div>')+`<div class="tag">확정 ${won(fixed)} · 미정 ${won(total-fixed)}</div>`}
+function bSum(){const{goal,total,fixed,lo,hi}=bparts(),left=goal-total;return`<div class="hs"><div><div class="tag">예상 총 비용</div><div class="big">${won(total)}</div></div><div class="hr tag">최저 ${won(lo)}<br>고가 ${won(hi)}</div></div>`+(goal?`<div class="bar"><b style="width:${Math.min(100,total/goal*100)}%;${total>goal?'background:var(--warn)':''}"></b></div><div class="tag">목표 ${won(goal)} · ${left>=0?'남음 '+won(left):'<span style="color:#FFB4A8">초과 '+won(-left)+'</span>'}${fixed?' · 확정 '+won(fixed):''}</div>`:'<div class="tag" style="margin-top:6px">목표 예산을 입력하면 남은 금액이 보여요</div>')}
 function bSim(){const{items,total,hc}=bparts(),other=items.filter(x=>!HRW.includes(x.id)).reduce((a,x)=>a+amt(x),0),L=S.Halls.map(h=>({h,c:hallCost(h)})).filter(x=>x.c!=null).sort((a,b)=>a.c-b.c);if(!L.length)return'<div class="tag">완성된 견적이 있는 웨딩홀이 없어요</div>';return L.map(x=>{const t=other+x.c,d=t-total,sel=hc.h&&hc.h.id==x.h.id&&hc.auto;return`<div class="q"><div><b>${E(x.h.name)}</b><div class="tag">웨딩홀 ${won(x.c)}</div></div><div style="text-align:right"><b>${won(t)}</b><div class="tag">${sel?'지금 선택':d==0?'동일':(d>0?'+':'−')+won(Math.abs(d))}</div></div></div>`}).join('')}
 function refreshB(){const a=$('#bsum'),b=$('#bsim');if(a)a.innerHTML=bSum();if(b)b.innerHTML=bSim()}
 function toast(m){const t=$('#toast');t.textContent=m;t.style.display='block';clearTimeout(t._);t._=setTimeout(()=>t.style.display='none',2800)}
@@ -320,13 +329,13 @@ function viewCk(){const L=S.Checklist,ph=[...new Set(L.map(x=>x.phase))];if(!ph.
  return hero+ph.map((n,i)=>{const a=L.filter(x=>x.phase==n),c=a.filter(x=>x.done=='Y').length;
  return`<details ${(openP.size?openP.has(n):n==firstOpen)?'open':''} data-p="${E(n)}"><summary>${E(n)}<span>${c}/${a.length}</span></summary><div class="mini"><b style="width:${c/a.length*100}%"></b></div>`+a.map(x=>`<div class="it ${x.done=='Y'?'d':''}"><input type="checkbox" id="k${x.id}" ${x.done=='Y'?'checked':''} data-id="${x.id}"><label for="k${x.id}">${E(x.text)}</label><button class="x" data-del="${x.id}" aria-label="삭제">×</button></div>`).join('')+`<button class="add" data-add="${E(n)}">+ 항목 추가</button></details>`}).join('')+'<button class="btn fab" data-addp>+ 새 단계 만들기</button>'}
 function viewH(){const H=S.Halls;return'<button class="btn p fab" data-newh>+ 웨딩홀 추가</button>'+(H.length?H.map(h=>{const qs=S.Quotes.filter(q=>q.hall==h.id).filter(complete),m=hallCost(h)||0;
- return`<div class="card"><h3>${E(h.name)}</h3><div class="tag">${E(h.region)}</div>${m?`<div class="best">식대 포함 최저 ${won(m)}<div class="tag" style="font-weight:400">하객 ${base()}명 기준(보증인원이 더 많으면 보증인원 기준) · 견적 ${qs.length}건</div></div>`:''}${(()=>{const L=(ks)=>`<dl>${HF.slice(2).filter(f=>ks(f[0])&&h[f[0]]).map(f=>`<dt>${f[1].replace(/\(.*\)/,'')}</dt><dd>${E(h[f[0]])}</dd>`).join('')}</dl>`,vs=['pros','cons'],rest=L(k=>!vs.includes(k));return L(k=>vs.includes(k))+(rest.includes('<dt>')?`<details class="hd"><summary>상세 정보 보기</summary>${rest}</details>`:'')})()}<div class="row"><button class="btn" data-eh="${h.id}">수정</button><button class="btn" data-nq="${h.id}">견적 추가</button><button class="btn w" data-dh="${h.id}">삭제</button></div></div>`}).join(''):'<div class="empty">웨딩홀을 추가해 보세요.</div>')}
+ return`<div class="card"><h3>${E(h.name)}</h3><div class="tag">${E(h.region)}</div>${m?`<div class="best">식대 포함 최저 ${won(m)}<div class="tag" style="font-weight:400">하객 ${base()}명 기준(보증인원이 더 많으면 보증인원 기준) · 견적 ${qs.length}건</div></div>`:''}${(()=>{const chips=(k,c)=>splitI(h[k]).length?`<div class="chs">${splitI(h[k]).map(x=>`<span class="cp ${c}">${E(x)}</span>`).join('')}</div>`:'';const ord=['location','parking','capacity','interval','vibe','bride','family','food','price','tips','src','memo'],lab=k=>HF.find(f=>f[0]==k)[1].replace(/\(.*\)/,''),rest=ord.filter(k=>h[k]).map(k=>`<div class="fs"><div class="fl">${lab(k)}</div>${lst(h[k])}</div>`).join('');return chips('pros','pro')+chips('cons','con')+(rest?`<details class="hd"><summary>상세 정보 보기</summary>${rest}</details>`:'')})()}<div class="row"><button class="btn" data-eh="${h.id}">수정</button><button class="btn" data-nq="${h.id}">견적 추가</button><button class="btn w" data-dh="${h.id}">삭제</button></div></div>`}).join(''):'<div class="empty">웨딩홀을 추가해 보세요.</div>')}
 function quoteCard(q){const ok=complete(q),g=+q.guests||0,t=tot(q),m=+q.meal||0;
  const mealSum=!m?vv(''):g?fw(m*g)+' ('+g+'명)':fw(m*base())+' (보증인원이 비어있어 하객 '+base()+'명 기준)';
  const R=(l,v)=>`<dt>${l}</dt><dd>${v}</dd>`,mon=v=>vv(v,x=>fw(+x)),dd=[R('예식일',vv(q.wdate,ds)),R('요일·시간대',vv(q.time)),R('보증인원',vv(q.guests,x=>x+'명'))];
  if(q.qdate)dd.push(R('견적 받은 날',E(ds(q.qdate))));if(q.source)dd.push(R('출처',E(q.source)));
  const cost=[R('대관료',mon(q.hall_fee)),R('생화장식',mon(q.flower)),R('식대 1인(대인)',mon(q.meal)),R('식대 합계',mealSum),R('소인(5~7세) 식대',mon(q.child)),R('주류 식대',vv(q.drink,x=>+x===0?'무료':fw(+x))),R('기타 추가금',mon(q.extra)),R('할인·혜택',vv(q.discount,x=>'−'+fw(+x)))];
- const cond=[R('계약금',mon(q.deposit)),R('부대비용·포함 항목',vv(q.incl)),R('혜택·특이사항',vv(q.perk)),R('메모',vv(q.memo))];
+ const cond=[R('계약금',mon(q.deposit)),R('부대비용·포함 항목',vv(q.incl,lst)),R('혜택·특이사항',vv(q.perk,lst)),R('메모',vv(q.memo))];
  return`<div class="card"><div class="qh"><h3>견적 ${qNo(q)}</h3><span class="tag">${E([ds(q.wdate),q.time].filter(Boolean).join(' · ')||'날짜·시간 비어있음')}</span></div>
  <div class="gh">기본 정보</div><dl class="qd">${dd.join('')}</dl><div class="gh">비용</div><dl class="qd">${cost.join('')}</dl>
  <div class="best">총 견적 (식대 포함) ${ok?`<b>${fw(t)}</b>${g&&g<base()?`<div class="tag" style="font-weight:400">하객 ${base()}명이면 ${fw(costAt(q))}</div>`:''}`:'<span class="ev">계산 불가 · 대관료·식대가 비어있어요</span>'}<div class="tag" style="font-weight:400">대관료 + 생화 + 기타 − 할인 + 식대×인원 (소인·주류 제외)</div></div>
@@ -370,7 +379,7 @@ function viewB(){const P=bparts(),{hr,hc,items,goal}=P;
  const row=x=>{const rep=hc.auto&&HRW.includes(x.id),f=unitF(x),r=hasR(x),p=posOf(x),a=amt(x),lock=rep||x.fixed=='Y';
   return`<div class="bi2 ${rep?'off':''}"><div class="l1"><input type="checkbox" data-bk="${x.id}|fixed" ${x.fixed=='Y'?'checked':''} aria-label="확정"><input class="bn" data-bk="${x.id}|name" value="${E(x.name)}">${r?`<span class="lv" id="lv_${x.id}">${lvl(p)}</span>`:''}<input class="ba" id="am_${x.id}" type="number" inputmode="decimal" placeholder="0" data-am="${x.id}" value="${manV(a)}" ${rep?'disabled':''}><span class="tag">만원</span><button class="x" data-db="${x.id}" aria-label="삭제">×</button></div>`+
   (r?`<input class="sl" type="range" min="0" max="100" step="1" value="${p}" style="--p:${p}%" data-sl="${x.id}" ${lock?'disabled':''} aria-label="${E(x.name)} 가격 수준"><div class="rng"><span>최저 ${fm(+x.min*f)}</span><span>중간</span><span>고가 ${fm(+x.max*f)}</span></div>`:'')+
-  (rep?'<div class="tag">웨딩홀 견적으로 대체돼요</div>':x.id=='r_meal'?`<div class="tag">1인 ${fm(Math.round((+x.min+(+x.max-+x.min)*p/100)/1000)*1000)}원 × ${base()}명</div>`:'')+'</div>'};
+  (rep?'<div class="tag">웨딩홀 견적으로 대체돼요</div>':x.id=='r_meal'?`<div class="tag">예상 하객 ${base()}명 기준 총액</div>`:'')+'</div>'};
  return`<div class="hero2 stick"><div id="bsum">${bSum()}</div></div>
  <div class="pre"><button class="btn" data-pre="0">전체 최저</button><button class="btn" data-pre="50">전체 중간</button><button class="btn" data-pre="100">전체 고가</button></div>
  <p class="note">슬라이더를 저→고로 밀면 위 금액이 바로 바뀌어요. 이미 금액이 정해진 항목은 체크(확정)하면 고정돼요. 일괄 버튼은 확정 항목을 건드리지 않아요.</p>
