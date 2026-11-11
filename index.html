@@ -171,6 +171,7 @@ input[type=range].sl{-webkit-appearance:none;appearance:none;width:100%;height:3
 .cp.con{background:color-mix(in srgb,var(--warn) 12%,transparent);color:var(--warn)}.cp.con::before{content:"− ";font-weight:800}
 .fs{padding:8px 0;border-top:1px solid var(--line)}.fs:first-child{margin-top:4px}.fl{font-size:var(--fs-xs);font-weight:700;color:var(--sub);margin-bottom:3px;letter-spacing:0}
 ul.il{margin:0;padding:0;list-style:none}.il li{position:relative;padding-left:13px;line-height:1.45;word-break:keep-all}.il li+li{margin-top:2px}.il li::before{content:"";position:absolute;left:2px;top:.62em;width:4px;height:4px;border-radius:50%;background:var(--brand)}
+details.tqd{margin-bottom:8px}.tqd>summary{padding:10px 14px}.tqd>summary span:last-of-type{font-weight:800}.tqd .card{border:0;border-radius:0;margin:0;padding:0 14px 12px;background:transparent}.tqd .card>.qh{display:none}
 details.hd{border:0;background:transparent;margin:6px 0 0;border-radius:0}.hd>summary{padding:8px 0 2px;font-size:var(--fs-sm);color:var(--brand)}.hd>summary span{display:none}
 .chips{display:flex;gap:6px;overflow-x:auto;margin:0 -12px;padding:2px 12px 10px;scrollbar-width:none;-webkit-overflow-scrolling:touch}.chips::-webkit-scrollbar{display:none}
 .chp{flex:none;max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border:1px solid var(--line2);background:var(--surface);border-radius:99px;padding:6px 12px;font-weight:600;font-size:var(--fs-sm)}
@@ -193,11 +194,11 @@ details.hd{border:0;background:transparent;margin:6px 0 0;border-radius:0}.hd>su
 <dialog id="dlg"></dialog><div id="toast"></div>
 <script>
 const $=s=>document.querySelector(s),E=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const API='https://script.google.com/macros/s/AKfycby5r-et8or-srW_VRRf-DjVrct4mbIBbH_s3LM15dmrPgxNxTQWbmhVmQUGIbsp1ziG/exec';
-let cfg=JSON.parse(localStorage.cfg||'{}'),S=JSON.parse(localStorage.cache||'{"Halls":[],"Quotes":[],"Checklist":[],"Scores":[],"Budget":[],"Tour":[]}'),tab='ck';
+const API='https://script.google.com/macros/s/AKfycby1bvKMQCqjKt5rPwTuVoqMOYEz-S4ukQfYNtE_E9mgR6bmd0gQAk165q3C6K09AjiH/exec';
+let cfg=JSON.parse(localStorage.cfg||'{}'),S=JSON.parse(localStorage.cache||'{"Halls":[],"Quotes":[],"Checklist":[],"Scores":[],"Budget":[],"Tour":[],"TQuotes":[]}'),tab='ck';
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,5);
 const won=n=>Math.round(n/1e4).toLocaleString('ko-KR')+'만원';
-S.Scores=S.Scores||[];S.Budget=S.Budget||[];S.Tour=S.Tour||[];
+S.Scores=S.Scores||[];S.Budget=S.Budget||[];S.Tour=S.Tour||[];S.TQuotes=S.TQuotes||[];
 const CRIT=[['meal','식사'],['vibe','홀 분위기'],['access','교통·주차'],['flow','동선·편의'],['gap','예식 여유']];
 const getW=()=>{const r=(S.Scores||[]).find(x=>x.id=='_w')||{};return{c1:+r.c1||3,c2:+r.c2||3,c3:+r.c3||3,c4:+r.c4||3,c5:+r.c5||3,c6:+r.c6||4,c7:+r.c7||150}};
 const base=()=>getW().c7;
@@ -241,16 +242,17 @@ function refreshT(){if(tab!='t'||tMode!='in')return;const M=tmap(),n=TQA.filter(
  const c=document.querySelector('.chp.on small');if(c)c.textContent=n+'/'+N}
 const autoh=el=>{if(!el.offsetParent)return;el.style.height='auto';el.style.height=Math.min(el.scrollHeight+2,window.innerHeight*.45)+'px'};
 function viewTI(M){const h=S.Halls.find(x=>x.id==tHall),N=TQA.length,n=TQA.filter(q=>(M[h.id+'.'+q.k]||'').trim()).length;
- const head=`<div class="th"><div><b>${E(h.name)}</b><div class="tag" id="tcnt">${n}/${N}개 입력</div></div><button class="btn p" data-nq="${h.id}">+ 견적 입력</button></div><div class="bar" style="margin:0 0 10px"><b id="tbar" style="width:${n/N*100}%"></b></div>`;
+ const tq=S.TQuotes.filter(q=>q.hall==h.id),qsec=`<div class="hh" style="margin:4px 2px 8px"><h3>내가 받은 상담 견적</h3><span class="tag">${tq.length?tq.length+'건':'없음'}</span><button class="btn p" data-tnq="${h.id}">+ 견적 입력</button></div>`+(tq.length?asT(()=>tq.map(q=>`<details class="tqd"><summary><span style="color:var(--ink);background:none;padding:0;font-size:var(--fs-md)">견적 ${qNo(q)} · ${E([ds(q.wdate),q.time].filter(Boolean).join(' ')||'날짜 비어있음')}</span><span>${complete(q)?won(costAt(q)):'계산 불가'}</span></summary>${quoteCard(q)}</details>`).join('')):'<p class="note" style="margin:0 2px 10px">상담하면서 받은 견적을 여기에 적어두세요. 메인 견적 탭·순위·예산과는 따로 저장돼요.</p>');
+ const head=`<div class="th"><div><b>${E(h.name)}</b><div class="tag" id="tcnt">${n}/${N}개 입력</div></div></div><div class="bar" style="margin:0 0 12px"><b id="tbar" style="width:${n/N*100}%"></b></div>`+qsec+`<div class="hh" style="margin:14px 2px 6px"><h3>상담 체크리스트</h3></div>`;
  return head+TQ.map(([sec,items,lk],si)=>{const c=items.filter(([k])=>(M[h.id+'.'+k]||'').trim()).length;
   return`<details class="tsec" data-ts="${si}" ${openT.has(si)?'open':''}><summary>${E(sec)}<span id="ts_${si}">${c}/${items.length}</span></summary>`+
-  (lk?`<div class="tq lk"><span>대관료·계약금·보증인원·식대는 견적으로 입력해요</span><button class="btn" data-nq="${h.id}">견적 입력</button></div>`:'')+
+  (lk?`<div class="tq lk"><span>대관료·계약금·보증인원·식대는 상담 견적으로 입력해요</span><button class="btn" data-tnq="${h.id}">견적 입력</button></div>`:'')+
   items.map(([k,l,y])=>{const v=M[h.id+'.'+k]||'';return`<div class="tq"><label for="tf_${k}">${E(l)}</label><div class="tin">${y=='y'?`<span class="yn"><button data-yn="${k}|O" class="${v=='O'?'on':''}" aria-label="O">O</button><button data-yn="${k}|X" class="${v=='X'?'on':''}" aria-label="X">X</button></span>`:''}<textarea id="tf_${k}" rows="${y=='L'?3:1}" data-tq="${k}" enterkeyhint="done" placeholder="${TE[k]?'예) '+E(TE[k]):k=='tmemo'?'예) 전체적인 느낌, 다시 확인할 것, 가족 의견':''}">${E(v)}</textarea></div></div>`}).join('')+`</details>`}).join('')+
   '<p class="note" style="margin-top:12px">입력하면 바로 구글 시트에 저장돼요. O / X 버튼을 누르면 빠르게 답할 수 있고, 한 번 더 누르면 지워져요.</p>'}
-function viewTC(M){const hs=S.Halls.filter(h=>TQA.some(q=>(M[h.id+'.'+q.k]||'').trim()));
- if(!hs.length)return'<div class="empty">아직 입력한 투어 내용이 없어요.<br>입력 탭에서 웨딩홀별로 적어보세요.</div>';
+function viewTC(M){const hs=S.Halls.filter(h=>TQA.some(q=>(M[h.id+'.'+q.k]||'').trim())),qt=S.TQuotes.length?'<div class="hh" style="margin:4px 2px 8px"><h3>상담 견적 비교</h3></div>'+asT(viewQT):'';
+ if(!hs.length)return qt+(qt?'':'<div class="empty">아직 입력한 투어 내용이 없어요.<br>입력 탭에서 웨딩홀별로 적어보세요.</div>');
  const rows=TQ.map(([sec,items])=>{const r=items.map(([k,l])=>{const vals=hs.map(h=>(M[h.id+'.'+k]||'').trim());if(!vals.some(Boolean))return'';if(tDiff&&vals.every(v=>v==vals[0]))return'';return`<tr><th class="s">${E(l)}</th>${vals.map(v=>v?`<td>${E(v)}</td>`:'<td class="ev">–</td>').join('')}</tr>`}).join('');return r?`<tr class="sh"><th colspan="${hs.length+1}">${E(sec)}</th></tr>`+r:''}).join('');
- return`<label class="dff"><input type="checkbox" data-tdiff ${tDiff?'checked':''}> 홀마다 답이 다른 항목만 보기</label><div class="tw"><table class="cmp tc"><thead><tr><th class="s">항목</th>${hs.map(h=>`<th>${E(h.name)}</th>`).join('')}</tr></thead><tbody>${rows||'<tr><td colspan="9" class="ev">다른 답이 있는 항목이 없어요</td></tr>'}</tbody></table></div><p class="note">입력한 내용이 있는 웨딩홀만 보여요. "–"는 비어있음이에요.</p>`}
+ return qt+'<div class="hh" style="margin:14px 2px 8px"><h3>상담 답변 비교</h3></div>'+`<label class="dff"><input type="checkbox" data-tdiff ${tDiff?'checked':''}> 홀마다 답이 다른 항목만 보기</label><div class="tw"><table class="cmp tc"><thead><tr><th class="s">항목</th>${hs.map(h=>`<th>${E(h.name)}</th>`).join('')}</tr></thead><tbody>${rows||'<tr><td colspan="9" class="ev">다른 답이 있는 항목이 없어요</td></tr>'}</tbody></table></div><p class="note">입력한 내용이 있는 웨딩홀만 보여요. "–"는 비어있음이에요.</p>`}
 function viewT(){if(!S.Halls.length)return'<div class="empty">웨딩홀을 먼저 추가하세요.</div>';
  if(!S.Halls.some(h=>h.id==tHall))tHall=S.Halls[0].id;const M=tmap(),N=TQA.length,cnt=h=>TQA.filter(q=>(M[h.id+'.'+q.k]||'').trim()).length;
  return`<div class="chips">${S.Halls.map(h=>`<button class="chp ${h.id==tHall?'on':''}" data-th="${h.id}">${E(h.name)}<small>${cnt(h)}/${N}</small></button>`).join('')}</div><div class="seg2"><button data-tm="in" class="${tMode=='in'?'on':''}">입력</button><button data-tm="cmp" class="${tMode=='cmp'?'on':''}">홀끼리 비교</button></div>`+(tMode=='cmp'?viewTC(M):viewTI(M))}
@@ -281,7 +283,8 @@ function viewRS(){
   <td>${note?`<span class="nt" style="margin:0;color:var(--ink)">${note}</span>`:'<span class="ev">비어있음</span>'}</td></tr>`}).join('');
  return`<p class="note">웨딩홀별 점수와 특징을 한 장으로 모았어요. 별은 순위 탭에서 입력한 점수(1~5)이고, 글자는 웨딩홀 탭에 적은 내용이에요. 가로로 밀어서 보세요.</p><div class="tw"><table class="cmp rs"><thead><tr><th class="s">웨딩홀</th>${hd.map(x=>`<th>${x}</th>`).join('')}</tr></thead><tbody>${rows}</tbody></table></div>`}
 const fw=n=>Math.round(n).toLocaleString('ko-KR')+'원';
-const qNo=q=>S.Quotes.filter(x=>x.hall==q.hall).indexOf(q)+1;
+let curQ='Quotes';const QS=()=>S[curQ]||[],asT=f=>{curQ='TQuotes';try{return f()}finally{curQ='Quotes'}};
+const qNo=q=>QS().filter(x=>x.hall==q.hall).indexOf(q)+1;
 const vv=(v,f)=>String(v??'')===''?'<span class="ev">비어있음</span>':(f?f(v):E(v));
 function hallCalc(r){r=r||{};const h=S.Halls.find(x=>x.id==r.hall);if(!h)return{h:null,q:null,amount:+r.amount||0,auto:false};
  const L=S.Quotes.filter(q=>q.hall==h.id);let q=r.quote?L.find(x=>x.id==r.quote):null;
@@ -307,7 +310,7 @@ const tFocus=()=>{const a=document.activeElement;return!!(a&&a.dataset&&a.datase
 const post=(tab,op,row,rows)=>fetch(API,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({tab,op,row,rows})}).then(r=>r.json()).then(d=>{if(d.error)throw d.error});
 async function load(){
  let d={};
- try{d=await(await fetch(API)).json();if(d.error)throw d.error;S={Halls:d.Halls||[],Quotes:d.Quotes||[],Checklist:d.Checklist||[],Scores:d.Scores||[],Budget:d.Budget||[],Tour:d.Tour||[]};pendT.forEach(r=>{const i=S.Tour.findIndex(x=>x.id==r.id);if(r.a.trim()==='')i>=0&&S.Tour.splice(i,1);else i<0?S.Tour.push(r):S.Tour[i]=r});localStorage.cache=JSON.stringify(S)}catch(e){toast('불러오기 실패: '+e);if(!tFocus())render();return}
+ try{d=await(await fetch(API)).json();if(d.error)throw d.error;S={Halls:d.Halls||[],Quotes:d.Quotes||[],Checklist:d.Checklist||[],Scores:d.Scores||[],Budget:d.Budget||[],Tour:d.Tour||[],TQuotes:d.TQuotes||[]};pendT.forEach(r=>{const i=S.Tour.findIndex(x=>x.id==r.id);if(r.a.trim()==='')i>=0&&S.Tour.splice(i,1);else i<0?S.Tour.push(r):S.Tour[i]=r});localStorage.cache=JSON.stringify(S)}catch(e){toast('불러오기 실패: '+e);if(!tFocus())render();return}
  if(!tFocus())render()}
 function send(tab,op,row){post(tab,op,row).catch(e=>toast('저장 실패: '+e))}
 function save(tb,row,quiet){const L=S[tb],i=L.findIndex(x=>x.id==row.id);i<0?L.push(row):L[i]=row;localStorage.cache=JSON.stringify(S);if(!quiet)render();send(tb,'save',row)}
@@ -339,12 +342,12 @@ function quoteCard(q){const ok=complete(q),g=+q.guests||0,t=tot(q),m=+q.meal||0;
  return`<div class="card"><div class="qh"><h3>견적 ${qNo(q)}</h3><span class="tag">${E([ds(q.wdate),q.time].filter(Boolean).join(' · ')||'날짜·시간 비어있음')}</span></div>
  <div class="gh">기본 정보</div><dl class="qd">${dd.join('')}</dl><div class="gh">비용</div><dl class="qd">${cost.join('')}</dl>
  <div class="best">총 견적 (식대 포함) ${ok?`<b>${fw(t)}</b>${g&&g<base()?`<div class="tag" style="font-weight:400">하객 ${base()}명이면 ${fw(costAt(q))}</div>`:''}`:'<span class="ev">계산 불가 · 대관료·식대가 비어있어요</span>'}<div class="tag" style="font-weight:400">대관료 + 생화 + 기타 − 할인 + 식대×인원 (소인·주류 제외)</div></div>
- <div class="gh">조건</div><dl class="qd">${cond.join('')}</dl><div class="row"><button class="btn" data-eq="${q.id}">수정</button><button class="btn w" data-dq="${q.id}">삭제</button></div></div>`}
+ <div class="gh">조건</div><dl class="qd">${cond.join('')}</dl><div class="row"><button class="btn" data-${curQ=='Quotes'?'':'t'}eq="${q.id}">수정</button><button class="btn w" data-${curQ=='Quotes'?'':'t'}dq="${q.id}">삭제</button></div></div>`}
 function viewQCards(){const known=new Set(S.Halls.map(h=>h.id)),orph=S.Quotes.filter(q=>!known.has(q.hall));
  return S.Halls.map(h=>{const L=S.Quotes.filter(q=>q.hall==h.id);return`<div class="hh"><h3>${E(h.name)}</h3><span class="tag">${L.length?'견적 '+L.length+'건':'견적 없음'}</span><button class="btn" data-nq="${h.id}">+ 견적 추가</button></div>`+L.map(quoteCard).join('')}).join('')+(orph.length?'<div class="hh"><h3>삭제된 웨딩홀</h3></div>'+orph.map(quoteCard).join(''):'')+(S.Halls.length?'':'<div class="empty">웨딩홀을 먼저 추가하세요.</div>')}
 let qmode='table';
 const ds=d=>{d=String(d||'');if(/T.*Z$/.test(d)){const t=new Date(d);if(!isNaN(t))return new Date(t.getTime()+9*36e5).toISOString().slice(0,10)}const m=d.match(/^(\d{4})-(\d\d)-(\d\d)/);return m?m[0]:d};
-function viewQT(){const cols=[];S.Halls.forEach(h=>S.Quotes.filter(q=>q.hall==h.id).forEach(q=>cols.push({h,q})));
+function viewQT(){const cols=[];S.Halls.forEach(h=>QS().filter(q=>q.hall==h.id).forEach(q=>cols.push({h,q})));
  if(!cols.length)return'<div class="empty">견적을 추가하면 표로 비교돼요.</div>';
  const ok=c=>complete(c.q),cost=c=>ok(c)?costAt(c.q):null,tt=c=>ok(c)?tot(c.q):null,n=v=>String(v??'')===''?null:+v;
  const ranks={};cols.filter(ok).sort((a,b)=>cost(a)-cost(b)).forEach((c,i)=>ranks[c.q.id]=i+1);
@@ -404,6 +407,9 @@ document.addEventListener('click',e=>{const t=e.target,g=a=>t.dataset[a];
  else if(g('eh'))form('Halls',HF,S.Halls.find(x=>x.id==g('eh')),'웨딩홀 수정');
  else if(g('dh'))del('Halls',g('dh'));
  else if(g('nq')!=null){if(!S.Halls.length)return toast('웨딩홀을 먼저 추가하세요');form('Quotes',QF,{hall:g('nq')||S.Halls[0].id},'견적 추가')}
+ else if(g('tnq')!=null){form('TQuotes',QF,{hall:g('tnq')||tHall},'상담 견적 추가')}
+ else if(g('teq'))form('TQuotes',QF,S.TQuotes.find(x=>x.id==g('teq')),'상담 견적 수정')
+ else if(g('tdq'))del('TQuotes',g('tdq'))
  else if(g('eq'))form('Quotes',QF,S.Quotes.find(x=>x.id==g('eq')),'견적 수정');
  else if(g('dq'))del('Quotes',g('dq'))
  else if(g('qm')){qmode=g('qm');render()}
