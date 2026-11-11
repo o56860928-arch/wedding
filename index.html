@@ -154,6 +154,15 @@ input[type=range].sl{-webkit-appearance:none;appearance:none;width:100%;height:3
 .sl::-moz-range-thumb{width:22px;height:22px;border-radius:50%;background:#fff;border:2px solid var(--brand);box-shadow:0 2px 6px rgba(0,0,0,.25)}
 .sl:disabled{opacity:.4}
 .rng{display:flex;justify-content:space-between;font-size:var(--fs-xs);color:var(--sub)}
+.rs th,.rs td{white-space:normal;text-align:left;vertical-align:top;min-width:116px;line-height:1.45}
+.rs th{text-align:center;vertical-align:middle}
+.rs .s{min-width:104px;vertical-align:middle}
+.rs .st{display:block;color:var(--brand);font-size:15px;letter-spacing:1px;white-space:nowrap;line-height:1.3}
+.rs .st.no{color:var(--line2)}
+.rs .nt{display:block;font-size:var(--fs-xs);color:var(--sub);margin-top:2px;word-break:keep-all}
+.rs .tot{font-size:20px;font-weight:800;letter-spacing:-.03em;line-height:1.2}.rs .tot small{font-size:11px;font-weight:600;color:var(--sub);margin-left:2px}
+.rs .rn{display:inline-grid;place-items:center;width:20px;height:20px;border-radius:50%;background:var(--tint);color:var(--brand);font-size:11px;font-weight:800;margin-right:6px}
+.rs .rn.top{background:var(--brand);color:var(--on-brand)}
 </style></head><body>
 <header id="bar"><div class="in"><div id="ttl">체크리스트</div><button id="chip" data-t="ck" aria-label="체크리스트 진행률"></button></div></header>
 <main id="main"></main>
@@ -161,7 +170,7 @@ input[type=range].sl{-webkit-appearance:none;appearance:none;width:100%;height:3
 <dialog id="dlg"></dialog><div id="toast"></div>
 <script>
 const $=s=>document.querySelector(s),E=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const API='https://script.google.com/macros/s/AKfycbzMEvJsKMB6WCRmIxp2MMEtEZHmpP0KJVYV56iS6uCESfhtjLgVhlTGO7S3yxZHSPXo/exec';
+const API='https://script.google.com/macros/s/AKfycbzdTjA5x59IaTSJwSMDW5Yv2RUt6LaYwM-SMuoaFA9mNoWgsl6C-FBs3yK3xCn2-6C8/exec';
 let cfg=JSON.parse(localStorage.cfg||'{}'),S=JSON.parse(localStorage.cache||'{"Halls":[],"Quotes":[],"Checklist":[],"Scores":[],"Budget":[]}'),tab='ck';
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,5);
 const won=n=>Math.round(n/1e4).toLocaleString('ko-KR')+'만원';
@@ -176,7 +185,28 @@ const costAt=q=>fees(q)+(+q.meal||0)*Math.max(base(),+q.guests||0);
 const hallCost=h=>{const c=S.Quotes.filter(q=>q.hall==h.id&&complete(q)).map(costAt);return c.length?Math.min(...c):null};
 function priceScores(){const c=S.Halls.map(h=>[h.id,hallCost(h)]).filter(x=>x[1]!=null),o={};if(!c.length)return o;const lo=Math.min(...c.map(x=>x[1])),hi=Math.max(...c.map(x=>x[1]));c.forEach(([id,v])=>o[id]=hi==lo?5:Math.round((5-4*(v-lo)/(hi-lo))*10)/10);return o}
 function ranking(){const W=getW(),ps=priceScores();return S.Halls.map(h=>{const sr=(S.Scores||[]).find(x=>x.id==h.id)||{};let num=0,den=0,n=0;CRIT.forEach((c,i)=>{const v=+sr['c'+(i+1)]||0,w=W['c'+(i+1)];if(v){num+=v*w;den+=5*w;n++}});const p=ps[h.id];if(p!=null){num+=p*W.c6;den+=5*W.c6;n++}return{h,sr,p,n,cost:hallCost(h),total:den&&n>=3?Math.round(num/den*100):null}}).sort((a,b)=>(b.total??-1)-(a.total??-1))}
-let wOpen=false;
+let wOpen=false,rmode='rank';
+const cut=(t,n)=>{t=String(t||'').trim();if(t.length>n)t=t.slice(0,n-1)+'…';else if((t.match(/\(/g)||[]).length>(t.match(/\)/g)||[]).length)t+='…)';return t};
+const segs=(t,k)=>/확인\s*필요|비공개/.test(String(t||''))?'':String(t||'').split(/\s*[\/,·]\s*/).filter(x=>x&&!/확인\s*필요|비공개/.test(x)).slice(0,k).join(' · ');
+function viewRS(){
+ if(!S.Halls.length)return'<div class="empty">웨딩홀을 먼저 추가하세요.</div>';
+ const R=ranking(),stars=(v,txt)=>{v=Math.round(+v||0);return(v?`<span class="st">${'★'.repeat(v)}<span style="opacity:.3">${'★'.repeat(5-v)}</span></span>`:`<span class="st no">미평가</span>`)+(txt?`<span class="nt">${E(cut(txt,34))}</span>`:'')};
+ const trans=h=>{const a=/확인\s*필요/.test(String(h.location||''))?'':String(h.location||'').split(/\s*[\/,·]\s*/).filter(x=>/역|도보|버스|출구|IC/.test(x)&&!/확인\s*필요/.test(x)).slice(0,2).join(' · ');return a||segs(h.location,1)};
+ const park=h=>segs(h.parking,1);
+ const hd=['종합','위치','교통·주차','식사','홀 분위기','동선·편의','예식 여유','견적','비고'];
+ const rows=R.map((r,i)=>{const h=r.h,sc=k=>+r.sr['c'+k]||0;
+  const note=[h.pros&&'👍 '+cut(segs(h.pros,1),22),h.cons&&'👎 '+cut(segs(h.cons,1),22)].filter(Boolean).join('<br>');
+  return`<tr><th class="s">${E(h.name)}</th>
+  <td>${r.total==null?'<span class="tag">순위 대기</span>':`<span class="rn ${i==0?'top':''}">${i+1}</span><span class="tot">${r.total}<small>점</small></span>`}</td>
+  <td>${h.region?`<span class="nt" style="margin:0;color:var(--ink)">${E(cut(h.region,24))}</span>`:'<span class="ev">비어있음</span>'}</td>
+  <td>${stars(sc(3),[trans(h),park(h)].filter(Boolean).join(' / '))}</td>
+  <td>${stars(sc(1),h.food)}</td>
+  <td>${stars(sc(2),h.vibe)}</td>
+  <td>${stars(sc(4),h.bride||h.family)}</td>
+  <td>${stars(sc(5),h.interval)}</td>
+  <td>${r.p!=null?stars(r.p,'기준 '+base()+'명 최저 약 '+won(r.cost)):'<span class="st no">견적 없음</span>'}</td>
+  <td>${note?`<span class="nt" style="margin:0;color:var(--ink)">${note}</span>`:'<span class="ev">비어있음</span>'}</td></tr>`}).join('');
+ return`<p class="note">웨딩홀별 점수와 특징을 한 장으로 모았어요. 별은 순위 탭에서 입력한 점수(1~5)이고, 글자는 웨딩홀 탭에 적은 내용이에요. 가로로 밀어서 보세요.</p><div class="tw"><table class="cmp rs"><thead><tr><th class="s">웨딩홀</th>${hd.map(x=>`<th>${x}</th>`).join('')}</tr></thead><tbody>${rows}</tbody></table></div>`}
 const fw=n=>Math.round(n).toLocaleString('ko-KR')+'원';
 const qNo=q=>S.Quotes.filter(x=>x.hall==q.hall).indexOf(q)+1;
 const vv=(v,f)=>String(v??'')===''?'<span class="ev">비어있음</span>':(f?f(v):E(v));
@@ -257,8 +287,9 @@ function viewQT(){const cols=[];S.Halls.forEach(h=>S.Quotes.filter(q=>q.hall==h.
 function viewQ(){return`<div class="seg2"><button data-qm="table" class="${qmode=='table'?'on':''}">표로 비교</button><button data-qm="card" class="${qmode=='card'?'on':''}">카드로 보기</button></div><button class="btn p fab" data-nq="">+ 견적 추가</button>`+(qmode=='table'?viewQT():viewQCards())}
 function viewR(){
  if(!S.Halls.length)return'<div class="empty">웨딩홀을 먼저 추가하세요.</div>';
- const W=getW(),R=ranking(),sel=v=>[1,2,3,4,5].map(n=>`<option ${n==v?'selected':''}>${n}</option>`).join('');
- return`<p class="note">항목별 점수(1~5)를 누르면 저장돼요. 점수 × 중요도로 100점 만점 순위를 계산하고, 견적 점수는 아래 기준 인원 가격으로 자동 계산돼요. 식사·분위기 등 기본 점수는 블로그 후기를 보고 제가 넣은 초안이니 직접 고치세요.</p>
+ const W=getW(),R=ranking(),sel=v=>[1,2,3,4,5].map(n=>`<option ${n==v?'selected':''}>${n}</option>`).join(''),tg=`<div class="seg2"><button data-rm="rank" class="${rmode=='rank'?'on':''}">순위·점수</button><button data-rm="sum" class="${rmode=='sum'?'on':''}">요약표</button></div>`;
+ if(rmode=='sum')return tg+viewRS();
+ return tg+`<p class="note">항목별 점수(1~5)를 누르면 저장돼요. 점수 × 중요도로 100점 만점 순위를 계산하고, 견적 점수는 아래 기준 인원 가격으로 자동 계산돼요. 식사·분위기 등 기본 점수는 블로그 후기를 보고 제가 넣은 초안이니 직접 고치세요.</p>
  <details ${wOpen?'open':''} id="wd"><summary>중요도·기준 인원<span>설정</span></summary><div class="wset">${CRIT.map((c,i)=>`<label>${c[1]} 중요도</label><select data-w="c${i+1}">${sel(W['c'+(i+1)])}</select>`).join('')}<label>견적(가격) 중요도</label><select data-w="c6">${sel(W.c6)}</select><label>예상 하객 수(명)<br><span class="tag">보증인원이 더 많으면 보증인원 기준</span></label><input type="number" inputmode="numeric" data-w="c7" value="${W.c7}"></div></details>`+
  R.map((r,i)=>`<div class="card"><div class="rk"><span class="n ${i==0&&r.total!=null?'top':''}">${r.total==null?'-':i+1}</span><div><h3>${E(r.h.name)}</h3><div class="tag">${r.total==null?(r.n+'/6개 평가 · 3개 이상 평가하면 순위에 들어가요'):r.n+'/6개 항목 평가'}</div></div><div class="sc">${r.total==null?'-':r.total}<small>/ 100점</small></div></div><div class="bar"><b style="width:${r.total||0}%"></b></div>`+
  CRIT.map((c,k)=>{const v=+r.sr['c'+(k+1)]||0;return`<div class="crit"><span class="l">${c[1]}</span><div class="dots">${[1,2,3,4,5].map(n=>`<button class="${n==v?'on':''}" data-sc="${r.h.id}|c${k+1}|${n}" aria-label="${c[1]} ${n}점">${n}</button>`).join('')}</div></div>`}).join('')+
@@ -298,6 +329,7 @@ document.addEventListener('click',e=>{const t=e.target,g=a=>t.dataset[a];
  else if(g('eq'))form('Quotes',QF,S.Quotes.find(x=>x.id==g('eq')),'견적 수정');
  else if(g('dq'))del('Quotes',g('dq'))
  else if(g('qm')){qmode=g('qm');render()}
+ else if(g('rm')){rmode=g('rm');render()}
  else if(g('pre')!=null){const v=g('pre'),ch=S.Budget.filter(x=>!BR.includes(x.id)&&hasR(x)&&x.fixed!='Y'&&String(x.pos)!==v);ch.forEach(x=>x.pos=v);localStorage.cache=JSON.stringify(S);render();if(ch.length)post('Budget','saveMany',null,ch).catch(e=>toast('저장 실패: '+e))}
  else if(t.dataset.ab!=null){const n=prompt('항목 이름');if(!n)return;const a=prompt('금액(만원) 또는 범위(예: 100~300). 비워도 돼요')||'',m=a.split('~').map(x=>parseFloat(x.replace(/,/g,''))),row={id:uid(),name:n,amount:'',fixed:'',hall:'',quote:'',memo:'',min:'',max:'',pos:''};if(m.length==2&&m.every(x=>!isNaN(x))){row.min=String(Math.min(...m)*1e4);row.max=String(Math.max(...m)*1e4);row.pos='50'}else if(!isNaN(m[0]))row.amount=String(Math.round(m[0]*1e4));save('Budget',row)}
  else if(t.dataset.rb!=null){toast('복원 중…');post('Budget','restoreBudget').then(load).then(()=>toast('기본 항목을 복원했어요')).catch(e=>toast('복원 실패: '+e+' (Code.gs 새 버전 배포가 필요해요)'))}
