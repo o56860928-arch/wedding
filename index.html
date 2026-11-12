@@ -30,6 +30,9 @@ button{cursor:pointer}
 #bar{position:sticky;top:0;z-index:20;padding-top:env(safe-area-inset-top);background:var(--bg);background:color-mix(in srgb,var(--bg) 86%,transparent);-webkit-backdrop-filter:saturate(1.4) blur(14px);backdrop-filter:saturate(1.4) blur(14px)}
 #bar .in{height:var(--bar);max-width:720px;margin:auto;padding:0 14px;display:flex;align-items:center;justify-content:space-between}
 #ttl{font-size:var(--fs-xl);font-weight:800;letter-spacing:-.03em}
+#eb{display:none;border:1px solid var(--line2);background:transparent;color:var(--sub);border-radius:99px;height:30px;padding:0 11px;font-size:12px;font-weight:700;margin-right:6px;white-space:nowrap}
+#eb.on{background:var(--tint);color:var(--brand);border-color:transparent}
+.card.dim{opacity:.6}details.hidg{margin-top:12px}.hidg>summary{font-size:var(--fs-sm);color:var(--sub)}
 #zb{border:1px solid var(--line2);background:transparent;color:var(--sub);border-radius:99px;width:34px;height:30px;font-weight:700;font-size:13px;margin-right:6px}
 .bt{display:flex;align-items:center}
 #chip{border:0;background:var(--tint);color:var(--brand);font-size:var(--fs-sm);font-weight:700;padding:6px 12px;border-radius:99px}
@@ -188,13 +191,13 @@ details.hd{border:0;background:transparent;margin:6px 0 0;border-radius:0}.hd>su
 .tc thead th{text-align:center}.tc .sh th{background:var(--tint);color:var(--brand);font-size:12px;text-align:left}.tc .s{min-width:84px;white-space:normal}
 .dff{display:flex;gap:8px;align-items:center;font-size:var(--fs-sm);color:var(--sub);margin:0 2px 8px}
 </style></head><body>
-<header id="bar"><div class="in"><div id="ttl">체크리스트</div><div class="bt"><button id="zb" aria-label="글자 크기 바꾸기">가</button><button id="chip" data-t="ck" aria-label="체크리스트 진행률"></button></div></div></header>
+<header id="bar"><div class="in"><div id="ttl">체크리스트</div><div class="bt"><button id="eb" aria-label="숨긴 웨딩홀 보기"></button><button id="zb" aria-label="글자 크기 바꾸기">가</button><button id="chip" data-t="ck" aria-label="체크리스트 진행률"></button></div></div></header>
 <main id="main"></main>
 <nav aria-label="메뉴"><button data-t="ck" class="on"><span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 11.5l2.5 2.5L16 9.5"/><rect x="4" y="4" width="16" height="16" rx="4"/></svg></span>체크리스트</button><button data-t="h"><span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V9l8-5 8 5v11"/><path d="M9 20v-5h6v5"/></svg></span>웨딩홀</button><button data-t="t"><span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s6-5.3 6-10a6 6 0 1 0-12 0c0 4.7 6 10 6 10z"/><circle cx="12" cy="11" r="2.2"/></svg></span>투어</button><button data-t="q"><span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="3.5" width="14" height="17" rx="2.5"/><path d="M9 8.5h6M9 12h6M9 15.5h3"/></svg></span>견적</button><button data-t="r"><span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 20v-7M12 20V5M17 20v-10"/></svg></span>순위</button><button data-t="b"><span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8.5A2.5 2.5 0 0 1 6.5 6H18a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H6.5A2.5 2.5 0 0 1 4 16.5z"/><path d="M4 8.5V7a2 2 0 0 1 2-2h15"/><circle cx="15.5" cy="12.5" r="1.1"/></svg></span>예산</button></nav>
 <dialog id="dlg"></dialog><div id="toast"></div>
 <script>
 const $=s=>document.querySelector(s),E=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const API='https://script.google.com/macros/s/AKfycby1bvKMQCqjKt5rPwTuVoqMOYEz-S4ukQfYNtE_E9mgR6bmd0gQAk165q3C6K09AjiH/exec';
+const API='https://script.google.com/macros/s/AKfycbyoXv9kNsbMvo13fKwri_kRvNxvqvsQ56Mx9MMwGm0SEfp1UfeG0tBrSm-RTscrVrRW/exec';
 let cfg=JSON.parse(localStorage.cfg||'{}'),S=JSON.parse(localStorage.cache||'{"Halls":[],"Quotes":[],"Checklist":[],"Scores":[],"Budget":[],"Tour":[],"TQuotes":[]}'),tab='ck';
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,5);
 const won=n=>Math.round(n/1e4).toLocaleString('ko-KR')+'만원';
@@ -207,8 +210,8 @@ const complete=q=>+q.hall_fee>0&&+q.meal>0;
 const tot=q=>fees(q)+(+q.meal||0)*(+q.guests||base());
 const costAt=q=>fees(q)+(+q.meal||0)*Math.max(base(),+q.guests||0);
 const hallCost=h=>{const c=S.Quotes.filter(q=>q.hall==h.id&&complete(q)).map(costAt);return c.length?Math.min(...c):null};
-function priceScores(){const c=S.Halls.map(h=>[h.id,hallCost(h)]).filter(x=>x[1]!=null),o={};if(!c.length)return o;const lo=Math.min(...c.map(x=>x[1])),hi=Math.max(...c.map(x=>x[1]));c.forEach(([id,v])=>o[id]=hi==lo?5:Math.round((5-4*(v-lo)/(hi-lo))*10)/10);return o}
-function ranking(){const W=getW(),ps=priceScores();return S.Halls.map(h=>{const sr=(S.Scores||[]).find(x=>x.id==h.id)||{};let num=0,den=0,n=0;CRIT.forEach((c,i)=>{const v=+sr['c'+(i+1)]||0,w=W['c'+(i+1)];if(v){num+=v*w;den+=5*w;n++}});const p=ps[h.id];if(p!=null){num+=p*W.c6;den+=5*W.c6;n++}return{h,sr,p,n,cost:hallCost(h),total:den&&n>=3?Math.round(num/den*100):null}}).sort((a,b)=>(b.total??-1)-(a.total??-1))}
+function priceScores(){const c=VH().map(h=>[h.id,hallCost(h)]).filter(x=>x[1]!=null),o={};if(!c.length)return o;const lo=Math.min(...c.map(x=>x[1])),hi=Math.max(...c.map(x=>x[1]));c.forEach(([id,v])=>o[id]=hi==lo?5:Math.round((5-4*(v-lo)/(hi-lo))*10)/10);return o}
+function ranking(){const W=getW(),ps=priceScores();return VH().map(h=>{const sr=(S.Scores||[]).find(x=>x.id==h.id)||{};let num=0,den=0,n=0;CRIT.forEach((c,i)=>{const v=+sr['c'+(i+1)]||0,w=W['c'+(i+1)];if(v){num+=v*w;den+=5*w;n++}});const p=ps[h.id];if(p!=null){num+=p*W.c6;den+=5*W.c6;n++}return{h,sr,p,n,cost:hallCost(h),total:den&&n>=3?Math.round(num/den*100):null}}).sort((a,b)=>(b.total??-1)-(a.total??-1))}
 let wOpen=false,rmode='rank';
 const TQ=[
 ['당일 예식·시간',[['t2','예식 시간 간격'],['t3','당일 다른 예식팀 수 (앞팀·뒷팀)']]],
@@ -249,13 +252,13 @@ function viewTI(M){const h=S.Halls.find(x=>x.id==tHall),N=TQA.length,n=TQA.filte
   (lk?`<div class="tq lk"><span>대관료·계약금·보증인원·식대는 상담 견적으로 입력해요</span><button class="btn" data-tnq="${h.id}">견적 입력</button></div>`:'')+
   items.map(([k,l,y])=>{const v=M[h.id+'.'+k]||'';return`<div class="tq"><label for="tf_${k}">${E(l)}</label><div class="tin">${y=='y'?`<span class="yn"><button data-yn="${k}|O" class="${v=='O'?'on':''}" aria-label="O">O</button><button data-yn="${k}|X" class="${v=='X'?'on':''}" aria-label="X">X</button></span>`:''}<textarea id="tf_${k}" rows="${y=='L'?3:1}" data-tq="${k}" enterkeyhint="done" placeholder="${TE[k]?'예) '+E(TE[k]):k=='tmemo'?'예) 전체적인 느낌, 다시 확인할 것, 가족 의견':''}">${E(v)}</textarea></div></div>`}).join('')+`</details>`}).join('')+
   '<p class="note" style="margin-top:12px">입력하면 바로 구글 시트에 저장돼요. O / X 버튼을 누르면 빠르게 답할 수 있고, 한 번 더 누르면 지워져요.</p>'}
-function viewTC(M){const hs=S.Halls.filter(h=>TQA.some(q=>(M[h.id+'.'+q.k]||'').trim())),qt=S.TQuotes.length?'<div class="hh" style="margin:4px 2px 8px"><h3>상담 견적 비교</h3></div>'+asT(viewQT):'';
+function viewTC(M){const hs=VH().filter(h=>TQA.some(q=>(M[h.id+'.'+q.k]||'').trim())),qt=S.TQuotes.length?'<div class="hh" style="margin:4px 2px 8px"><h3>상담 견적 비교</h3></div>'+asT(viewQT):'';
  if(!hs.length)return qt+(qt?'':'<div class="empty">아직 입력한 투어 내용이 없어요.<br>입력 탭에서 웨딩홀별로 적어보세요.</div>');
  const rows=TQ.map(([sec,items])=>{const r=items.map(([k,l])=>{const vals=hs.map(h=>(M[h.id+'.'+k]||'').trim());if(!vals.some(Boolean))return'';if(tDiff&&vals.every(v=>v==vals[0]))return'';return`<tr><th class="s">${E(l)}</th>${vals.map(v=>v?`<td>${E(v)}</td>`:'<td class="ev">–</td>').join('')}</tr>`}).join('');return r?`<tr class="sh"><th colspan="${hs.length+1}">${E(sec)}</th></tr>`+r:''}).join('');
  return qt+'<div class="hh" style="margin:14px 2px 8px"><h3>상담 답변 비교</h3></div>'+`<label class="dff"><input type="checkbox" data-tdiff ${tDiff?'checked':''}> 홀마다 답이 다른 항목만 보기</label><div class="tw"><table class="cmp tc"><thead><tr><th class="s">항목</th>${hs.map(h=>`<th>${E(h.name)}</th>`).join('')}</tr></thead><tbody>${rows||'<tr><td colspan="9" class="ev">다른 답이 있는 항목이 없어요</td></tr>'}</tbody></table></div><p class="note">입력한 내용이 있는 웨딩홀만 보여요. "–"는 비어있음이에요.</p>`}
-function viewT(){if(!S.Halls.length)return'<div class="empty">웨딩홀을 먼저 추가하세요.</div>';
- if(!S.Halls.some(h=>h.id==tHall))tHall=S.Halls[0].id;const M=tmap(),N=TQA.length,cnt=h=>TQA.filter(q=>(M[h.id+'.'+q.k]||'').trim()).length;
- return`<div class="chips">${S.Halls.map(h=>`<button class="chp ${h.id==tHall?'on':''}" data-th="${h.id}">${E(h.name)}<small>${cnt(h)}/${N}</small></button>`).join('')}</div><div class="seg2"><button data-tm="in" class="${tMode=='in'?'on':''}">입력</button><button data-tm="cmp" class="${tMode=='cmp'?'on':''}">홀끼리 비교</button></div>`+(tMode=='cmp'?viewTC(M):viewTI(M))}
+function viewT(){if(!VH().length)return S.Halls.length?'<div class="empty">보이는 웨딩홀이 없어요.<br>웨딩홀 탭에서 숨김을 해제하세요.</div>':'<div class="empty">웨딩홀을 먼저 추가하세요.</div>';
+ if(!VH().some(h=>h.id==tHall))tHall=VH()[0].id;const M=tmap(),N=TQA.length,cnt=h=>TQA.filter(q=>(M[h.id+'.'+q.k]||'').trim()).length;
+ return`<div class="chips">${VH().map(h=>`<button class="chp ${h.id==tHall?'on':''}" data-th="${h.id}">${E(HN(h))}<small>${cnt(h)}/${N}</small></button>`).join('')}</div><div class="seg2"><button data-tm="in" class="${tMode=='in'?'on':''}">입력</button><button data-tm="cmp" class="${tMode=='cmp'?'on':''}">홀끼리 비교</button></div>`+(tMode=='cmp'?viewTC(M):viewTI(M))}
 let zv='m';try{zv=localStorage.z||'m'}catch(_){}document.documentElement.dataset.z=zv;
 function cycleZ(){zv=zv=='m'?'l':zv=='l'?'s':'m';document.documentElement.dataset.z=zv;try{localStorage.z=zv}catch(_){}toast('글자 크기: '+({s:'작게',m:'보통',l:'크게'}[zv]))}
 
@@ -271,7 +274,7 @@ function viewRS(){
  const hd=['종합','위치','교통·주차','식사','홀 분위기','동선·편의','예식 여유','견적','비고'];
  const rows=R.map((r,i)=>{const h=r.h,sc=k=>+r.sr['c'+k]||0;
   const note=[h.pros&&'👍 '+cut(segs(h.pros,1),22),h.cons&&'👎 '+cut(segs(h.cons,1),22)].filter(Boolean).join('<br>');
-  return`<tr><th class="s">${E(h.name)}</th>
+  return`<tr><th class="s">${E(HN(h))}</th>
   <td>${r.total==null?'<span class="tag">순위 대기</span>':`<span class="rn ${i==0?'top':''}">${i+1}</span><span class="tot">${r.total}<small>점</small></span>`}</td>
   <td>${h.region?`<span class="nt" style="margin:0;color:var(--ink)">${E(cut(h.region,24))}</span>`:'<span class="ev">비어있음</span>'}</td>
   <td>${stars(sc(3),[trans(h),park(h)].filter(Boolean).join(' / '))}</td>
@@ -283,6 +286,8 @@ function viewRS(){
   <td>${note?`<span class="nt" style="margin:0;color:var(--ink)">${note}</span>`:'<span class="ev">비어있음</span>'}</td></tr>`}).join('');
  return`<p class="note">웨딩홀별 점수와 특징을 한 장으로 모았어요. 별은 순위 탭에서 입력한 점수(1~5)이고, 글자는 웨딩홀 탭에 적은 내용이에요. 가로로 밀어서 보세요.</p><div class="tw"><table class="cmp rs"><thead><tr><th class="s">웨딩홀</th>${hd.map(x=>`<th>${x}</th>`).join('')}</tr></thead><tbody>${rows}</tbody></table></div>`}
 const fw=n=>Math.round(n).toLocaleString('ko-KR')+'원';
+let showH=false;try{showH=localStorage.showH=='1'}catch(_){}
+const VH=()=>showH?S.Halls:S.Halls.filter(h=>h.hidden!='Y'),HN=h=>h.name+(showH&&h.hidden=='Y'?' (숨김)':''),nHid=()=>S.Halls.filter(h=>h.hidden=='Y').length;
 let curQ='Quotes';const QS=()=>S[curQ]||[],asT=f=>{curQ='TQuotes';try{return f()}finally{curQ='Quotes'}};
 const qNo=q=>QS().filter(x=>x.hall==q.hall).indexOf(q)+1;
 const vv=(v,f)=>String(v??'')===''?'<span class="ev">비어있음</span>':(f?f(v):E(v));
@@ -303,7 +308,7 @@ function bparts(){const rows=S.Budget,hr=rows.find(x=>x.id=='b_hall'),goal=+((ro
  const sum=live.reduce((a,x)=>a+amt(x),0),lo=live.reduce((a,x)=>a+(hasR(x)&&!fx(x)?amt(x,0):amt(x)),0),hi=live.reduce((a,x)=>a+(hasR(x)&&!fx(x)?amt(x,100):amt(x)),0),hallAmt=hc.auto?hc.amount:0;
  return{hr,items,live,goal,hc,sum,hallAmt,total:hallAmt+sum,lo:hallAmt+lo,hi:hallAmt+hi,fixed:(hc.auto&&hr&&hr.fixed=='Y'?hallAmt:0)+live.filter(fx).reduce((a,x)=>a+amt(x),0)}}
 function bSum(){const{goal,total,fixed,lo,hi}=bparts(),left=goal-total;return`<div class="hs"><div><div class="tag">예상 총 비용</div><div class="big">${won(total)}</div></div><div class="hr tag">최저 ${won(lo)}<br>고가 ${won(hi)}</div></div>`+(goal?`<div class="bar"><b style="width:${Math.min(100,total/goal*100)}%;${total>goal?'background:var(--warn)':''}"></b></div><div class="tag">목표 ${won(goal)} · ${left>=0?'남음 '+won(left):'<span style="color:#FFB4A8">초과 '+won(-left)+'</span>'}${fixed?' · 확정 '+won(fixed):''}</div>`:'<div class="tag" style="margin-top:6px">목표 예산을 입력하면 남은 금액이 보여요</div>')}
-function bSim(){const{items,total,hc}=bparts(),other=items.filter(x=>!HRW.includes(x.id)).reduce((a,x)=>a+amt(x),0),L=S.Halls.map(h=>({h,c:hallCost(h)})).filter(x=>x.c!=null).sort((a,b)=>a.c-b.c);if(!L.length)return'<div class="tag">완성된 견적이 있는 웨딩홀이 없어요</div>';return L.map(x=>{const t=other+x.c,d=t-total,sel=hc.h&&hc.h.id==x.h.id&&hc.auto;return`<div class="q"><div><b>${E(x.h.name)}</b><div class="tag">웨딩홀 ${won(x.c)}</div></div><div style="text-align:right"><b>${won(t)}</b><div class="tag">${sel?'지금 선택':d==0?'동일':(d>0?'+':'−')+won(Math.abs(d))}</div></div></div>`}).join('')}
+function bSim(){const{items,total,hc}=bparts(),other=items.filter(x=>!HRW.includes(x.id)).reduce((a,x)=>a+amt(x),0),L=VH().map(h=>({h,c:hallCost(h)})).filter(x=>x.c!=null).sort((a,b)=>a.c-b.c);if(!L.length)return'<div class="tag">완성된 견적이 있는 웨딩홀이 없어요</div>';return L.map(x=>{const t=other+x.c,d=t-total,sel=hc.h&&hc.h.id==x.h.id&&hc.auto;return`<div class="q"><div><b>${E(x.h.name)}</b><div class="tag">웨딩홀 ${won(x.c)}</div></div><div style="text-align:right"><b>${won(t)}</b><div class="tag">${sel?'지금 선택':d==0?'동일':(d>0?'+':'−')+won(Math.abs(d))}</div></div></div>`}).join('')}
 function refreshB(){const a=$('#bsum'),b=$('#bsim');if(a)a.innerHTML=bSum();if(b)b.innerHTML=bSim()}
 function toast(m){const t=$('#toast');t.textContent=m;t.style.display='block';clearTimeout(t._);t._=setTimeout(()=>t.style.display='none',2800)}
 const tFocus=()=>{const a=document.activeElement;return!!(a&&a.dataset&&a.dataset.tq!=null)};
@@ -326,13 +331,14 @@ const openP=new Set();
 document.addEventListener('toggle',e=>{if(e.target.dataset&&e.target.dataset.ts!=null){const k=+e.target.dataset.ts;if(e.target.open){openT.add(k);e.target.querySelectorAll('textarea').forEach(autoh)}else openT.delete(k);return}const n=e.target.dataset&&e.target.dataset.p;if(n==null)return;if(!openP.size){const f=document.querySelectorAll('details[data-p]');f.forEach(d=>d.open&&openP.add(d.dataset.p))}e.target.open?openP.add(n):openP.delete(n)},true);
 const TT={ck:'체크리스트',h:'웨딩홀',t:'투어',q:'견적',r:'순위',b:'예산'};
 function prog(){const L=S.Checklist,ph=[...new Set(L.map(x=>x.phase))],dn=L.filter(x=>x.done=='Y').length;return{L,ph,dn,p:L.length?Math.round(dn/L.length*100):0}}
-function head(){const{dn,p,L}=prog();$('#ttl').textContent=TT[tab];$('#chip').textContent=L.length?`진행률 ${p}%`:''}
+function head(){const{dn,p,L}=prog();$('#ttl').textContent=TT[tab];const eb=$('#eb'),nh=nHid();eb.style.display=nh&&tab!='ck'?'inline-block':'none';eb.classList.toggle('on',showH);eb.textContent=showH?'숨긴 홀 보는 중':'숨긴 홀 '+nh+'곳';$('#chip').textContent=L.length?`진행률 ${p}%`:''}
 function viewCk(){const L=S.Checklist,ph=[...new Set(L.map(x=>x.phase))];if(!ph.length)return'<div class="empty">불러오는 중이거나 아직 항목이 없어요.<br>잠시 후 새로고침해 보세요.</div>';
  const{dn,p}=prog(),firstOpen=ph.find(q=>L.some(x=>x.phase==q&&x.done!='Y')),hero=`<div class="hero"><div class="lab">나의 결혼 준비</div><div class="pct">${p}<small>%</small></div><div class="seg">${ph.map(n=>{const a=L.filter(x=>x.phase==n),c=a.filter(x=>x.done=='Y').length;return`<i title="${E(n)}"><b style="width:${c/a.length*100}%"></b></i>`}).join('')}</div><div class="cnt">${L.length}개 중 ${dn}개 완료 · 남은 ${L.length-dn}개</div></div>`;
  return hero+ph.map((n,i)=>{const a=L.filter(x=>x.phase==n),c=a.filter(x=>x.done=='Y').length;
  return`<details ${(openP.size?openP.has(n):n==firstOpen)?'open':''} data-p="${E(n)}"><summary>${E(n)}<span>${c}/${a.length}</span></summary><div class="mini"><b style="width:${c/a.length*100}%"></b></div>`+a.map(x=>`<div class="it ${x.done=='Y'?'d':''}"><input type="checkbox" id="k${x.id}" ${x.done=='Y'?'checked':''} data-id="${x.id}"><label for="k${x.id}">${E(x.text)}</label><button class="x" data-del="${x.id}" aria-label="삭제">×</button></div>`).join('')+`<button class="add" data-add="${E(n)}">+ 항목 추가</button></details>`}).join('')+'<button class="btn fab" data-addp>+ 새 단계 만들기</button>'}
-function viewH(){const H=S.Halls;return'<button class="btn p fab" data-newh>+ 웨딩홀 추가</button>'+(H.length?H.map(h=>{const qs=S.Quotes.filter(q=>q.hall==h.id).filter(complete),m=hallCost(h)||0;
- return`<div class="card"><h3>${E(h.name)}</h3><div class="tag">${E(h.region)}</div>${m?`<div class="best">식대 포함 최저 ${won(m)}<div class="tag" style="font-weight:400">하객 ${base()}명 기준(보증인원이 더 많으면 보증인원 기준) · 견적 ${qs.length}건</div></div>`:''}${(()=>{const chips=(k,c)=>splitI(h[k]).length?`<div class="chs">${splitI(h[k]).map(x=>`<span class="cp ${c}">${E(x)}</span>`).join('')}</div>`:'';const ord=['location','parking','capacity','interval','vibe','bride','family','food','price','tips','src','memo'],lab=k=>HF.find(f=>f[0]==k)[1].replace(/\(.*\)/,''),rest=ord.filter(k=>h[k]).map(k=>`<div class="fs"><div class="fl">${lab(k)}</div>${lst(h[k])}</div>`).join('');return chips('pros','pro')+chips('cons','con')+(rest?`<details class="hd"><summary>상세 정보 보기</summary>${rest}</details>`:'')})()}<div class="row"><button class="btn" data-eh="${h.id}">수정</button><button class="btn" data-nq="${h.id}">견적 추가</button><button class="btn w" data-dh="${h.id}">삭제</button></div></div>`}).join(''):'<div class="empty">웨딩홀을 추가해 보세요.</div>')}
+function viewH(){const H=VH(),hid=showH?[]:S.Halls.filter(h=>h.hidden=='Y');return'<button class="btn p fab" data-newh>+ 웨딩홀 추가</button>'+(H.length?H.map(h=>{const qs=S.Quotes.filter(q=>q.hall==h.id).filter(complete),m=hallCost(h)||0;
+ const hd=h.hidden=='Y';return`<div class="card${hd?' dim':''}"><h3>${E(h.name)}${hd?' <span class="cp" style="background:var(--line);color:var(--sub);font-size:11px">숨김</span>':''}</h3><div class="tag">${E(h.region)}</div>${m?`<div class="best">식대 포함 최저 ${won(m)}<div class="tag" style="font-weight:400">하객 ${base()}명 기준(보증인원이 더 많으면 보증인원 기준) · 견적 ${qs.length}건</div></div>`:''}${(()=>{const chips=(k,c)=>splitI(h[k]).length?`<div class="chs">${splitI(h[k]).map(x=>`<span class="cp ${c}">${E(x)}</span>`).join('')}</div>`:'';const ord=['location','parking','capacity','interval','vibe','bride','family','food','price','tips','src','memo'],lab=k=>HF.find(f=>f[0]==k)[1].replace(/\(.*\)/,''),rest=ord.filter(k=>h[k]).map(k=>`<div class="fs"><div class="fl">${lab(k)}</div>${lst(h[k])}</div>`).join('');return chips('pros','pro')+chips('cons','con')+(rest?`<details class="hd"><summary>상세 정보 보기</summary>${rest}</details>`:'')})()}<div class="row"><button class="btn" data-eh="${h.id}">수정</button><button class="btn" data-nq="${h.id}">견적 추가</button><button class="btn" data-${hd?'uh':'hh'}="${h.id}">${hd?'숨김 해제':'숨기기'}</button><button class="btn w" data-dh="${h.id}">삭제</button></div></div>`}).join(''):S.Halls.length?'<div class="empty">보이는 웨딩홀이 없어요.</div>':'<div class="empty">웨딩홀을 추가해 보세요.</div>')+(hid.length?`<details class="hidg"><summary>숨긴 웨딩홀 ${hid.length}곳<span>펼치기</span></summary>${hid.map(h=>`<div class="q" style="padding:10px 14px"><div><b>${E(h.name)}</b><div class="tag">${E(h.region)}</div></div><button class="btn" data-uh="${h.id}">다시 보이기</button></div>`).join('')}</details>`:'')}
+
 function quoteCard(q){const ok=complete(q),g=+q.guests||0,t=tot(q),m=+q.meal||0;
  const mealSum=!m?vv(''):g?fw(m*g)+' ('+g+'명)':fw(m*base())+' (보증인원이 비어있어 하객 '+base()+'명 기준)';
  const R=(l,v)=>`<dt>${l}</dt><dd>${v}</dd>`,mon=v=>vv(v,x=>fw(+x)),dd=[R('예식일',vv(q.wdate,ds)),R('요일·시간대',vv(q.time)),R('보증인원',vv(q.guests,x=>x+'명'))];
@@ -344,10 +350,10 @@ function quoteCard(q){const ok=complete(q),g=+q.guests||0,t=tot(q),m=+q.meal||0;
  <div class="best">총 견적 (식대 포함) ${ok?`<b>${fw(t)}</b>${g&&g<base()?`<div class="tag" style="font-weight:400">하객 ${base()}명이면 ${fw(costAt(q))}</div>`:''}`:'<span class="ev">계산 불가 · 대관료·식대가 비어있어요</span>'}<div class="tag" style="font-weight:400">대관료 + 생화 + 기타 − 할인 + 식대×인원 (소인·주류 제외)</div></div>
  <div class="gh">조건</div><dl class="qd">${cond.join('')}</dl><div class="row"><button class="btn" data-${curQ=='Quotes'?'':'t'}eq="${q.id}">수정</button><button class="btn w" data-${curQ=='Quotes'?'':'t'}dq="${q.id}">삭제</button></div></div>`}
 function viewQCards(){const known=new Set(S.Halls.map(h=>h.id)),orph=S.Quotes.filter(q=>!known.has(q.hall));
- return S.Halls.map(h=>{const L=S.Quotes.filter(q=>q.hall==h.id);return`<div class="hh"><h3>${E(h.name)}</h3><span class="tag">${L.length?'견적 '+L.length+'건':'견적 없음'}</span><button class="btn" data-nq="${h.id}">+ 견적 추가</button></div>`+L.map(quoteCard).join('')}).join('')+(orph.length?'<div class="hh"><h3>삭제된 웨딩홀</h3></div>'+orph.map(quoteCard).join(''):'')+(S.Halls.length?'':'<div class="empty">웨딩홀을 먼저 추가하세요.</div>')}
+ return VH().map(h=>{const L=S.Quotes.filter(q=>q.hall==h.id);return`<div class="hh"><h3>${E(HN(h))}</h3><span class="tag">${L.length?'견적 '+L.length+'건':'견적 없음'}</span><button class="btn" data-nq="${h.id}">+ 견적 추가</button></div>`+L.map(quoteCard).join('')}).join('')+(orph.length?'<div class="hh"><h3>삭제된 웨딩홀</h3></div>'+orph.map(quoteCard).join(''):'')+(S.Halls.length?'':'<div class="empty">웨딩홀을 먼저 추가하세요.</div>')}
 let qmode='table';
 const ds=d=>{d=String(d||'');if(/T.*Z$/.test(d)){const t=new Date(d);if(!isNaN(t))return new Date(t.getTime()+9*36e5).toISOString().slice(0,10)}const m=d.match(/^(\d{4})-(\d\d)-(\d\d)/);return m?m[0]:d};
-function viewQT(){const cols=[];S.Halls.forEach(h=>QS().filter(q=>q.hall==h.id).forEach(q=>cols.push({h,q})));
+function viewQT(){const cols=[];VH().forEach(h=>QS().filter(q=>q.hall==h.id).forEach(q=>cols.push({h,q})));
  if(!cols.length)return'<div class="empty">견적을 추가하면 표로 비교돼요.</div>';
  const ok=c=>complete(c.q),cost=c=>ok(c)?costAt(c.q):null,tt=c=>ok(c)?tot(c.q):null,n=v=>String(v??'')===''?null:+v;
  const ranks={};cols.filter(ok).sort((a,b)=>cost(a)-cost(b)).forEach((c,i)=>ranks[c.q.id]=i+1);
@@ -359,16 +365,16 @@ function viewQT(){const cols=[];S.Halls.forEach(h=>QS().filter(q=>q.hall==h.id).
   ['총 견적(식대 포함)',c=>tt(c),'m','','k'],['하객 '+base()+'명 기준',c=>cost(c),'m','b','k'],['저렴한 순위',c=>ranks[c.q.id]?ranks[c.q.id]+'위':null,'','','k']];
  const grp=[];cols.forEach(c=>{const g=grp[grp.length-1];g&&g.h.id==c.h.id?g.n++:grp.push({h:c.h,n:1})});
  const body=R.map(([l,fn,t,b,k])=>{const bv=b?best(fn):null;return`<tr class="${k||''}"><th class="s">${l}</th>`+cols.map(c=>{const v=fn(c);if(v==null)return'<td class="ev">–</td>';const tx=t=='m'?fm(v):t=='d'?(+v===0?'무료':fm(v)):t=='dc'?'−'+fm(v):E(v);return`<td class="${bv!=null&&v===bv?'bst':''}">${tx}</td>`}).join('')+'</tr>'}).join('');
- return`<div class="tw"><table class="cmp"><thead><tr><th class="s" rowspan="2">금액 단위: 원</th>${grp.map(g=>`<th colspan="${g.n}">${E(g.h.name)}</th>`).join('')}</tr><tr>${cols.map(c=>`<th>견적 ${qNo(c.q)}</th>`).join('')}</tr></thead><tbody>${body}</tbody></table></div>
+ return`<div class="tw"><table class="cmp"><thead><tr><th class="s" rowspan="2">금액 단위: 원</th>${grp.map(g=>`<th colspan="${g.n}">${E(HN(g.h))}</th>`).join('')}</tr><tr>${cols.map(c=>`<th>견적 ${qNo(c.q)}</th>`).join('')}</tr></thead><tbody>${body}</tbody></table></div>
  <p class="note">금액은 만원 단위예요(6.6만 = 66,000원). 초록색 칸이 대관료·식대·기준 비용 중 가장 낮은 값이고, "–"는 비어있음이에요. 하객 수 기준 비용은 보증인원이 더 많으면 보증인원 기준으로 계산해요. 포함 항목·혜택은 카드 보기에서 확인하세요.</p>`}
 function viewQ(){return`<div class="seg2"><button data-qm="table" class="${qmode=='table'?'on':''}">표로 비교</button><button data-qm="card" class="${qmode=='card'?'on':''}">카드로 보기</button></div><button class="btn p fab" data-nq="">+ 견적 추가</button>`+(qmode=='table'?viewQT():viewQCards())}
 function viewR(){
- if(!S.Halls.length)return'<div class="empty">웨딩홀을 먼저 추가하세요.</div>';
+ if(!VH().length)return S.Halls.length?'<div class="empty">보이는 웨딩홀이 없어요.<br>웨딩홀 탭에서 숨김을 해제하세요.</div>':'<div class="empty">웨딩홀을 먼저 추가하세요.</div>';
  const W=getW(),R=ranking(),sel=v=>[1,2,3,4,5].map(n=>`<option ${n==v?'selected':''}>${n}</option>`).join(''),tg=`<div class="seg2"><button data-rm="rank" class="${rmode=='rank'?'on':''}">순위·점수</button><button data-rm="sum" class="${rmode=='sum'?'on':''}">요약표</button></div>`;
  if(rmode=='sum')return tg+viewRS();
  return tg+`<p class="note">항목별 점수(1~5)를 누르면 저장돼요. 점수 × 중요도로 100점 만점 순위를 계산하고, 견적 점수는 아래 기준 인원 가격으로 자동 계산돼요. 식사·분위기 등 기본 점수는 블로그 후기를 보고 제가 넣은 초안이니 직접 고치세요.</p>
  <details ${wOpen?'open':''} id="wd"><summary>중요도·기준 인원<span>설정</span></summary><div class="wset">${CRIT.map((c,i)=>`<label>${c[1]} 중요도</label><select data-w="c${i+1}">${sel(W['c'+(i+1)])}</select>`).join('')}<label>견적(가격) 중요도</label><select data-w="c6">${sel(W.c6)}</select><label>예상 하객 수(명)<br><span class="tag">보증인원이 더 많으면 보증인원 기준</span></label><input type="number" inputmode="numeric" data-w="c7" value="${W.c7}"></div></details>`+
- R.map((r,i)=>`<div class="card"><div class="rk"><span class="n ${i==0&&r.total!=null?'top':''}">${r.total==null?'-':i+1}</span><div><h3>${E(r.h.name)}</h3><div class="tag">${r.total==null?(r.n+'/6개 평가 · 3개 이상 평가하면 순위에 들어가요'):r.n+'/6개 항목 평가'}</div></div><div class="sc">${r.total==null?'-':r.total}<small>/ 100점</small></div></div><div class="bar"><b style="width:${r.total||0}%"></b></div>`+
+ R.map((r,i)=>`<div class="card"><div class="rk"><span class="n ${i==0&&r.total!=null?'top':''}">${r.total==null?'-':i+1}</span><div><h3>${E(HN(r.h))}</h3><div class="tag">${r.total==null?(r.n+'/6개 평가 · 3개 이상 평가하면 순위에 들어가요'):r.n+'/6개 항목 평가'}</div></div><div class="sc">${r.total==null?'-':r.total}<small>/ 100점</small></div></div><div class="bar"><b style="width:${r.total||0}%"></b></div>`+
  CRIT.map((c,k)=>{const v=+r.sr['c'+(k+1)]||0;return`<div class="crit"><span class="l">${c[1]}</span><div class="dots">${[1,2,3,4,5].map(n=>`<button class="${n==v?'on':''}" data-sc="${r.h.id}|c${k+1}|${n}" aria-label="${c[1]} ${n}점">${n}</button>`).join('')}</div></div>`}).join('')+
  `<div class="crit"><span class="l">견적</span><span>${r.p!=null?`<b>${r.p}점</b> · 기준 ${W.c7}명 최저 약 ${won(r.cost)}`:'<span class="tag">완성된 견적이 없어요 (대관료·식대 입력)</span>'}</span></div></div>`).join('')+
  '<p class="note">견적 점수는 등록된 웨딩홀 중 가장 싼 곳이 5점, 가장 비싼 곳이 1점인 상대 점수예요. 날짜·시간대에 따라 견적이 크게 달라서 웨딩홀마다 최저 견적을 비교해요.</p>'}
@@ -395,6 +401,9 @@ function viewB(){const P=bparts(),{hr,hc,items,goal}=P;
 function render(){head();$('#main').innerHTML={ck:viewCk,h:viewH,t:viewT,q:viewQ,r:viewR,b:viewB}[tab]();document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.t==tab));if(tab=='t')document.querySelectorAll('details.tsec[open] textarea').forEach(autoh)}
 document.addEventListener('click',e=>{const t=e.target,g=a=>t.dataset[a];
  if(t.id=='zb')cycleZ();
+ else if(t.id=='eb'){showH=!showH;try{localStorage.showH=showH?'1':'0'}catch(_){}render();toast(showH?'숨긴 웨딩홀도 같이 보여요':'숨긴 웨딩홀은 가렸어요')}
+ else if(g('hh')){const h=S.Halls.find(x=>x.id==g('hh'));if(h){save('Halls',{...h,hidden:'Y'});toast('숨겼어요 · 위쪽 "숨긴 홀" 버튼이나 웨딩홀 탭 맨 아래에서 다시 볼 수 있어요')}}
+ else if(g('uh')){const h=S.Halls.find(x=>x.id==g('uh'));if(h){save('Halls',{...h,hidden:''});toast('다시 보이게 했어요')}}
  else if(t.dataset.t){flushT();tab=g('t');render();scrollTo(0,0)}
  else if(g('th')){flushT();tHall=g('th');try{localStorage.tHall=tHall}catch(_){}render();scrollTo(0,0)}
  else if(g('tm')){flushT();tMode=g('tm');render()}
