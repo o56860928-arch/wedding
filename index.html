@@ -208,7 +208,7 @@ details.hd{border:0;background:transparent;margin:6px 0 0;border-radius:0}.hd>su
 <dialog id="dlg"></dialog><div id="toast"></div>
 <script>
 const $=s=>document.querySelector(s),E=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const API='https://script.google.com/macros/s/AKfycbzhJsrtIJn1VBHw8EcGcyVBZiQIO4yPUoq4HK_ImRv-_82_xuEX6qk2_HUublA1YXaL/exec';
+const API='https://script.google.com/macros/s/AKfycbz_qWGZTM33IsctiuTgcORuLw3bxDAf-0bemTuSBk2k_SPHScvbILrEEG4015qH3DRO/exec';
 let cfg=JSON.parse(localStorage.cfg||'{}'),S=JSON.parse(localStorage.cache||'{"Halls":[],"Quotes":[],"Checklist":[],"Scores":[],"Budget":[],"Tour":[],"TQuotes":[],"Events":[]}'),tab='ck';
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,5);
 const won=n=>Math.round(n/1e4).toLocaleString('ko-KR')+'만원';
@@ -234,7 +234,7 @@ function gcal(e){const d=e.date.replace(/-/g,'');let dt;if(/^\d\d:\d\d/.test(e.t
  return'https://calendar.google.com/calendar/render?action=TEMPLATE&text='+encodeURIComponent(e.title)+'&dates='+dt+(e.memo?'&details='+encodeURIComponent(e.memo):'')+'&ctz=Asia%2FSeoul'}
 function evRow(e,withDate){const h=S.Halls.find(x=>x.id==e.hall),sub=[e.type,h&&h.name,+e.amount?won(+e.amount):'',e.memo&&cut(e.memo,22)].filter(Boolean).join(' · '),n=dday(e.date);
  return`<div class="evr ${e.done=='Y'?'d':''}"><span class="eb2" style="background:${evc(e.type)}"></span><div class="evb" data-ee="${e.id}">${withDate?`<div class="tag">${e.date.slice(5).replace('-','/')} (${WD[dd0(e.date).getDay()]})${e.time?' '+E(e.time):''} · <b style="color:var(--brand)">${ddl(n)}</b></div>`:''}<div class="evt">${!withDate&&e.time?E(e.time)+' · ':''}${E(e.title)}</div><div class="tag">${E(sub)}</div></div><div class="eva"><button class="x" data-evd="${e.id}" aria-label="완료 표시" style="${e.done=='Y'?'color:var(--brand);opacity:1':''}">✓</button><button class="x" data-xe="${e.id}" aria-label="삭제">×</button><a class="gc" href="${gcal(e)}" target="_blank" rel="noopener">구글캘린더</a></div></div>`}
-function viewC(){const ev=(S.Events||[]).map(e=>({...e,date:ds(e.date)})).filter(e=>/^\d{4}-\d\d-\d\d$/.test(e.date)).sort((a,b)=>(a.date+(a.time||'')).localeCompare(b.date+(b.time||''))),by={};ev.forEach(e=>(by[e.date]=by[e.date]||[]).push(e));
+function viewC(){const ev=(S.Events||[]).map(e=>({...e,date:ds(e.date),time:tmf(e.time)})).filter(e=>/^\d{4}-\d\d-\d\d$/.test(e.date)).sort((a,b)=>(a.date+(a.time||'')).localeCompare(b.date+(b.time||''))),by={};ev.forEach(e=>(by[e.date]=by[e.date]||[]).push(e));
  const first=new Date(cY,cM,1).getDay(),dim=new Date(cY,cM+1,0).getDate(),td=todayS();let cells='';for(let i=0;i<first;i++)cells+='<span class="cd emp"></span>';
  for(let d=1;d<=dim;d++){const k=ymd(cY,cM,d),L=by[k]||[],w=(first+d-1)%7;cells+=`<button class="cd ${k==cSel?'sel':''} ${k==td?'tdy':''} ${w==0?'sun':w==6?'sat':''}" data-cd="${k}" aria-label="${cM+1}월 ${d}일"><span class="dn">${d}</span>${L.slice(0,2).map(e=>`<b class="ce" style="background:${evc(e.type)}${e.done=='Y'?';opacity:.45':''}">${E(e.title)}</b>`).join('')}${L.length>2?`<span class="cm">+${L.length-2}</span>`:''}</button>`}
  const wed=ev.filter(e=>e.type=='결혼식'&&dday(e.date)>=0)[0],sel=by[cSel]||[],up=ev.filter(e=>e.date>=td&&e.done!='Y').slice(0,10),sd=dd0(cSel);
@@ -383,6 +383,7 @@ function quoteCard(q){const ok=complete(q),g=+q.guests||0,t=tot(q),m=+q.meal||0;
 function viewQCards(){const known=new Set(S.Halls.map(h=>h.id)),orph=S.Quotes.filter(q=>!known.has(q.hall));
  return VH().map(h=>{const L=S.Quotes.filter(q=>q.hall==h.id);return`<div class="hh"><h3>${E(HN(h))}</h3><span class="tag">${L.length?'견적 '+L.length+'건':'견적 없음'}</span><button class="btn" data-nq="${h.id}">+ 견적 추가</button></div>`+L.map(quoteCard).join('')}).join('')+(orph.length?'<div class="hh"><h3>삭제된 웨딩홀</h3></div>'+orph.map(quoteCard).join(''):'')+(S.Halls.length?'':'<div class="empty">웨딩홀을 먼저 추가하세요.</div>')}
 let qmode='table';
+const tmf=t=>{t=String(t||'');const m=t.match(/^1899-12-\d\dT(\d\d:\d\d)/)||t.match(/^(\d{1,2}:\d\d)/);return m?m[1].padStart(5,'0'):''};
 const ds=d=>{d=String(d||'');if(/T.*Z$/.test(d)){const t=new Date(d);if(!isNaN(t))return new Date(t.getTime()+9*36e5).toISOString().slice(0,10)}const m=d.match(/^(\d{4})-(\d\d)-(\d\d)/);return m?m[0]:d};
 function viewQT(){const cols=[];VH().forEach(h=>QS().filter(q=>q.hall==h.id).forEach(q=>cols.push({h,q})));
  if(!cols.length)return'<div class="empty">견적을 추가하면 표로 비교돼요.</div>';
@@ -441,7 +442,7 @@ document.addEventListener('click',e=>{const t=e.target,g=a=>t.dataset[a];
  else if(g('cd')){cSel=g('cd');render();const el=document.getElementById('csel');el&&el.scrollIntoView({behavior:'smooth',block:'nearest'})}
  else if(g('cm')){const m=g('cm');if(m=='t'){const n=new Date();cY=n.getFullYear();cM=n.getMonth();cSel=todayS()}else{cM+=m=='n'?1:-1;if(cM>11){cM=0;cY++}if(cM<0){cM=11;cY--}}render()}
  else if(g('ne')!=null)form('Events',EF,{date:g('ne')||cSel,type:'상담·투어'},'일정 추가')
- else if(g('ee')){const x=S.Events.find(i=>i.id==g('ee'));if(x)form('Events',EF,{...x,date:ds(x.date)},'일정 수정')}
+ else if(g('ee')){const x=S.Events.find(i=>i.id==g('ee'));if(x)form('Events',EF,{...x,date:ds(x.date),time:tmf(x.time)},'일정 수정')}
  else if(g('evd')){const x=S.Events.find(i=>i.id==g('evd'));if(x)save('Events',{...x,done:x.done=='Y'?'':'Y'})}
  else if(g('xe'))del('Events',g('xe'))
  else if(g('yn')){const[k,v]=g('yn').split('|'),ta=document.getElementById('tf_'+k);ta.value=ta.value===v?'':v;ta.dispatchEvent(new Event('input',{bubbles:true}));t.parentNode.querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.yn.split('|')[1]===ta.value))}
